@@ -166,8 +166,10 @@ namespace Hypernex.CCK.Editor.Editors
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            ViewPosition.vector3Value = EditorGUILayout.Vector3Field("Viewpoint", ViewPosition.vector3Value);
-            SpeechPosition.vector3Value = EditorGUILayout.Vector3Field("Speech Position", SpeechPosition.vector3Value);
+            ViewPosition.objectReferenceValue =
+                EditorGUILayout.ObjectField("ViewPosition", ViewPosition.objectReferenceValue, typeof(GameObject), true);
+            SpeechPosition.objectReferenceValue =
+                EditorGUILayout.ObjectField("SpeechPosition", SpeechPosition.objectReferenceValue, typeof(GameObject), true);
             EditorGUILayout.Separator();
             UseEyeManager.boolValue = EditorGUILayout.Toggle("Use Eye Manager", UseEyeManager.boolValue);
             if (UseEyeManager.boolValue)
@@ -186,10 +188,29 @@ namespace Hypernex.CCK.Editor.Editors
                     if (UseLeftEyeBoneInstead.boolValue)
                     {
                         EditorGUILayout.PropertyField(LeftEyeBone);
-                        EditorGUILayout.PropertyField(LeftEyeUpLimit);
-                        EditorGUILayout.PropertyField(LeftEyeDownLimit);
-                        EditorGUILayout.PropertyField(LeftEyeLeftLimit);
-                        EditorGUILayout.PropertyField(LeftEyeRightLimit);
+                        if (Avatar.LeftEyeBone != null)
+                        {
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(LeftEyeUpLimit);
+                            if (GUILayout.Button("Paste"))
+                                LeftEyeUpLimit.quaternionValue = Avatar.LeftEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(LeftEyeDownLimit);
+                            if (GUILayout.Button("Paste"))
+                                LeftEyeDownLimit.quaternionValue = Avatar.LeftEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(LeftEyeLeftLimit);
+                            if (GUILayout.Button("Paste"))
+                                LeftEyeLeftLimit.quaternionValue = Avatar.LeftEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(LeftEyeRightLimit);
+                            if (GUILayout.Button("Paste"))
+                                LeftEyeRightLimit.quaternionValue = Avatar.LeftEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                        }
                     }
                     if (!UseCombinedEyeBlendshapes.boolValue)
                         DrawEye(ref Avatar.LeftEyeBlendshapes, UseLeftEyeBoneInstead.boolValue);
@@ -200,10 +221,29 @@ namespace Hypernex.CCK.Editor.Editors
                     if (UseRightEyeBoneInstead.boolValue)
                     {
                         EditorGUILayout.PropertyField(RightEyeBone);
-                        EditorGUILayout.PropertyField(RightEyeUpLimit);
-                        EditorGUILayout.PropertyField(RightEyeDownLimit);
-                        EditorGUILayout.PropertyField(RightEyeLeftLimit);
-                        EditorGUILayout.PropertyField(RightEyeRightLimit);
+                        if (Avatar.RightEyeBone != null)
+                        {
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(RightEyeUpLimit);
+                            if (GUILayout.Button("Paste"))
+                                RightEyeUpLimit.quaternionValue = Avatar.RightEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(RightEyeDownLimit);
+                            if (GUILayout.Button("Paste"))
+                                RightEyeDownLimit.quaternionValue = Avatar.RightEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(RightEyeLeftLimit);
+                            if (GUILayout.Button("Paste"))
+                                RightEyeLeftLimit.quaternionValue = Avatar.RightEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.PropertyField(RightEyeRightLimit);
+                            if (GUILayout.Button("Paste"))
+                                RightEyeRightLimit.quaternionValue = Avatar.RightEyeBone.localRotation;
+                            GUILayout.EndHorizontal();
+                        }
                     }
                     if (!UseCombinedEyeBlendshapes.boolValue)
                         DrawEye(ref Avatar.RightEyeBlendshapes, UseRightEyeBoneInstead.boolValue);

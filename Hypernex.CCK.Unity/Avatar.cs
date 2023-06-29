@@ -11,8 +11,8 @@ namespace Hypernex.CCK.Unity
     [RequireComponent(typeof(Animator))]
     public class Avatar : MonoBehaviour
     {
-        public Vector3 ViewPosition;
-        public Vector3 SpeechPosition;
+        public GameObject ViewPosition;
+        public GameObject SpeechPosition;
 
         public bool UseEyeManager;
         public List<SkinnedMeshRenderer> EyeRenderers = new List<SkinnedMeshRenderer>();

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Hypernex.CCK.Editor.Editors.Tools;
 using Hypernex.CCK.Unity;
 using HypernexSharp.APIObjects;
@@ -94,7 +95,7 @@ namespace Hypernex.CCK.Editor.Editors
                 if (isSignUp)
                     email = EditorGUILayout.TextField("Email", email);
                 password = EditorGUILayout.PasswordField("Password", password);
-                if (AuthManager.IsInviteCodeRequired(targetDomain))
+                if (AuthManager.IsInviteCodeRequired(targetDomain) && isSignUp)
                     inviteCode = EditorGUILayout.TextField("Invite Code", inviteCode);
                 EditorGUILayout.BeginHorizontal();
                 if (!isLoggingIn && GUILayout.Button(isSignUp ? "Signup" : "Login"))
@@ -248,28 +249,28 @@ namespace Hypernex.CCK.Editor.Editors
                 FileStream fileStream = new FileStream(assetPath, FileMode.Open, FileAccess.Read,
                     FileShare.Delete | FileShare.Read);
                 AuthManager.Instance.HypernexObject.UploadAvatar(result =>
-                {
-                    isBuilding = false;
-                    if (result.success)
                     {
-                        EditorTools.InvokeOnMainThread((Action)(() =>
+                        isBuilding = false;
+                        if (result.success)
                         {
-                            if(!string.IsNullOrEmpty(result.result.AvatarId))
-                                SelectedAvatar.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.AvatarId);
-                            EditorUtility.DisplayDialog("Hypernex.CCK", "Avatar Uploaded!", "OK");
-                        }));
-                    }
-                    else
-                    {
-                        EditorTools.InvokeOnMainThread((Action)(() =>
+                            EditorTools.InvokeOnMainThread((Action)(() =>
+                            {
+                                if(!string.IsNullOrEmpty(result.result.AvatarId))
+                                    SelectedAvatar.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.AvatarId);
+                                EditorUtility.DisplayDialog("Hypernex.CCK", "Avatar Uploaded!", "OK");
+                            }));
+                        }
+                        else
                         {
-                            Logger.CurrentLogger.Warn(result.message);
-                            EditorUtility.DisplayDialog("Hypernex.CCK", "Failed to upload avatar!", "OK");
-                        }));
-                    }
-                    fileStream.Dispose();
-                    tempDir.Dispose();
-                }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
+                            EditorTools.InvokeOnMainThread((Action)(() =>
+                            {
+                                Logger.CurrentLogger.Warn(result.message);
+                                EditorUtility.DisplayDialog("Hypernex.CCK", "Failed to upload avatar!", "OK");
+                            }));
+                        }
+                        fileStream.Dispose();
+                        tempDir.Dispose();
+                    }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
                     SelectedAvatar.Meta);
             }
         }
@@ -348,7 +349,8 @@ namespace Hypernex.CCK.Editor.Editors
                             return;
                         }
                         SelectedAvatar.Meta.BuildPlatform = buildPlatform;
-                        TempDir tempDir = new TempDir();
+                        TempDir tempDir = new TempDir(true);
+                        TempDir thumbnailTempDir = new TempDir();
                         if (SelectedAvatar.ReplaceImage && SelectedAvatar.Image != null)
                         {
                             string spriteAssetPath = AssetDatabase.GetAssetPath(SelectedAvatar.Image);
@@ -374,7 +376,7 @@ namespace Hypernex.CCK.Editor.Editors
                             {
                                 MemoryStream ms = new MemoryStream();
                                 b.Value.Item2.Save(ms, ImageFormat.Png);
-                                FileStream g = tempDir.CreateFile("thumbnail.png", ms.ToArray());
+                                FileStream g = thumbnailTempDir.CreateFile("thumbnail.png", ms.ToArray());
                                 AuthManager.Instance.HypernexObject.UploadFile(result =>
                                 {
                                     if (result.success)
@@ -389,6 +391,7 @@ namespace Hypernex.CCK.Editor.Editors
                                     g.Dispose();
                                     b.Value.Item2.Dispose();
                                     b.Value.Item1.Dispose();
+                                    thumbnailTempDir.Dispose();
                                 }, AuthManager.CurrentUser, AuthManager.CurrentToken, g);
                             }
                         }
@@ -728,12 +731,12 @@ namespace Hypernex.CCK.Editor.Editors
                     MessageType.Info);
                 return false;
             }
-            if (!XRSettings.enabled)
+
+            if (PlayerSettings.stereoRenderingPath != StereoRenderingPath.Instancing)
             {
-                EditorGUILayout.HelpBox("XR Support is disabled! Click the button below to enable it.",
-                    MessageType.Error);
-                if (GUILayout.Button("Enable XR"))
-                    XRSettings.enabled = true;
+                EditorGUILayout.HelpBox("Rendering is not Instanced!", MessageType.Error);
+                if(GUILayout.Button("Fix!"))
+                    PlayerSettings.stereoRenderingPath = StereoRenderingPath.Instancing;
                 return false;
             }
             return true;
@@ -756,9 +759,10 @@ namespace Hypernex.CCK.Editor.Editors
             if (Window != null)
             {
                 // must end area after header!
-                Imaging.DrawHeader("Hypernex.CCK.Editor.Resources.banner.png",
+                // TODO: Gets really laggy after scene reload
+                /*Imaging.DrawHeader("Hypernex.CCK.Editor.Resources.banner.png",
                     new Vector2(Window.position.x, Window.position.y),
-                    new Vector2(Window.position.width, Window.position.height));
+                    new Vector2(Window.position.width, Window.position.height));*/
                 if (banStatus != null)
                     RenderBan();
                 else if(warnStatus != null)
@@ -833,7 +837,7 @@ namespace Hypernex.CCK.Editor.Editors
                 }
                 else
                     AllowBuild = VerifyProject();
-                GUILayout.EndArea();
+                /*GUILayout.EndArea();*/
             }
         }
     }

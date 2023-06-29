@@ -8,7 +8,6 @@ namespace Hypernex.CCK.Editor.Editors
     [CustomEditor(typeof(World))]
     public class WorldEditor : UnityEditor.Editor
     {
-        private SerializedProperty ReferenceCamera;
         private SerializedProperty AllowRespawn;
         private SerializedProperty Gravity;
         private SerializedProperty JumpHeight;
@@ -19,7 +18,6 @@ namespace Hypernex.CCK.Editor.Editors
 
         private void OnEnable()
         {
-            ReferenceCamera = serializedObject.FindProperty("ReferenceCamera");
             AllowRespawn = serializedObject.FindProperty("AllowRespawn");
             Gravity = serializedObject.FindProperty("Gravity");
             JumpHeight = serializedObject.FindProperty("JumpHeight");
@@ -37,11 +35,6 @@ namespace Hypernex.CCK.Editor.Editors
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            EditorGUILayout.HelpBox(
-                "The Reference Camera is the camera which all properties will be cloned onto the client's camera in realtime",
-                MessageType.Info);
-            ReferenceCamera.objectReferenceValue = EditorGUILayout.ObjectField("Reference Camera",
-                ReferenceCamera.objectReferenceValue, typeof(Camera), true);
             AllowRespawn.boolValue = EditorGUILayout.Toggle("Allow Respawn", AllowRespawn.boolValue);
             AllowRunning.boolValue = EditorGUILayout.Toggle("Allow Running", AllowRunning.boolValue);
             EditorGUILayout.Separator();

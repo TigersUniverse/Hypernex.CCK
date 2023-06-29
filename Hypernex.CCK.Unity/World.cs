@@ -9,7 +9,6 @@ namespace Hypernex.CCK.Unity
     [RequireComponent(typeof(AssetIdentifier))]
     public class World : MonoBehaviour
     {
-        public Camera ReferenceCamera;
         public List<GameObject> SpawnPoints = new List<GameObject>();
         public List<NexboxScript> LocalScripts = new List<NexboxScript>();
         public List<NexboxScript> ServerScripts = new List<NexboxScript>();
