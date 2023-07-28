@@ -62,7 +62,7 @@ namespace Hypernex.CCK.Editor.Editors
         private static bool dv;
         private static bool dvs = true;
 
-        private void DrawEye(ref SerializedDictionaries.EyeBlendshapeActionDict f, bool useBones)
+        private void DrawEye(SerializedDictionaries.EyeBlendshapeActionDict f, bool useBones)
         {
             List<(string, SkinnedMeshRenderer, int)> m = new List<(string, SkinnedMeshRenderer, int)>();
             int x = 0;
@@ -91,25 +91,34 @@ namespace Hypernex.CCK.Editor.Editors
                         if (keyValuePair.Value != null && keyValuePair.Value.MatchString == options[i])
                             index = i;
                     }
-                    int selected = EditorGUILayout.Popup(keyValuePair.Key.ToString(), index, options);
-                    (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
-                    foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                    //int selected = EditorGUILayout.Popup(keyValuePair.Key.ToString(), index, options);
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Label(keyValuePair.Key.ToString());
+                    if (GUILayout.Button(options[index]))
                     {
-                        if (valueTuple.Item1 == options[selected])
-                            match = valueTuple;
+                        BlendshapeSelector.ShowWindow(options, selected =>
+                        {
+                            (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
+                            foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                            {
+                                if (valueTuple.Item1 == options[selected])
+                                    match = valueTuple;
+                            }
+                            if (!string.IsNullOrEmpty(match.Item1))
+                            {
+                                if (f[keyValuePair.Key] == null)
+                                    f[keyValuePair.Key] = new BlendshapeDescriptor();
+                                else if(f[keyValuePair.Key].MatchString != match.Item1)
+                                    EditorUtility.SetDirty(Avatar.gameObject);
+                                f[keyValuePair.Key].MatchString = match.Item1;
+                                f[keyValuePair.Key].SkinnedMeshRenderer = match.Item2;
+                                f[keyValuePair.Key].BlendshapeIndex = match.Item3;
+                            }
+                            else if (selected == 0)
+                                f[keyValuePair.Key] = null;
+                        });
                     }
-                    if (!string.IsNullOrEmpty(match.Item1))
-                    {
-                        if (f[keyValuePair.Key] == null)
-                            f[keyValuePair.Key] = new BlendshapeDescriptor();
-                        else if(f[keyValuePair.Key].MatchString != match.Item1)
-                            EditorUtility.SetDirty(Avatar.gameObject);
-                        f[keyValuePair.Key].MatchString = match.Item1;
-                        f[keyValuePair.Key].SkinnedMeshRenderer = match.Item2;
-                        f[keyValuePair.Key].BlendshapeIndex = match.Item3;
-                    }
-                    else if (selected == 0)
-                        f[keyValuePair.Key] = null;
+                    EditorGUILayout.EndHorizontal();
                 }
             }
         }
@@ -141,25 +150,34 @@ namespace Hypernex.CCK.Editor.Editors
                     if (keyValuePair.Value != null && keyValuePair.Value.MatchString == options[i])
                         index = i;
                 }
-                int selected = EditorGUILayout.Popup(keyValuePair.Key.ToString(), index, options);
-                (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
-                foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                //int selected = EditorGUILayout.Popup(keyValuePair.Key.ToString(), index, options);
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label(keyValuePair.Key.ToString());
+                if (GUILayout.Button(options[index]))
                 {
-                    if (valueTuple.Item1 == options[selected])
-                        match = valueTuple;
+                    BlendshapeSelector.ShowWindow(options, selected =>
+                    {
+                        (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
+                        foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                        {
+                            if (valueTuple.Item1 == options[selected])
+                                match = valueTuple;
+                        }
+                        if (!string.IsNullOrEmpty(match.Item1))
+                        {
+                            if (Avatar.VisemesDict[keyValuePair.Key] == null)
+                                Avatar.VisemesDict[keyValuePair.Key] = new BlendshapeDescriptor();
+                            else if(Avatar.VisemesDict[keyValuePair.Key].MatchString != match.Item1)
+                                EditorUtility.SetDirty(Avatar.gameObject);
+                            Avatar.VisemesDict[keyValuePair.Key].MatchString = match.Item1;
+                            Avatar.VisemesDict[keyValuePair.Key].SkinnedMeshRenderer = match.Item2;
+                            Avatar.VisemesDict[keyValuePair.Key].BlendshapeIndex = match.Item3;
+                        }
+                        else if (selected == 0)
+                            Avatar.VisemesDict[keyValuePair.Key] = null;
+                    });
                 }
-                if (!string.IsNullOrEmpty(match.Item1))
-                {
-                    if (Avatar.VisemesDict[keyValuePair.Key] == null)
-                        Avatar.VisemesDict[keyValuePair.Key] = new BlendshapeDescriptor();
-                    else if(Avatar.VisemesDict[keyValuePair.Key].MatchString != match.Item1)
-                        EditorUtility.SetDirty(Avatar.gameObject);
-                    Avatar.VisemesDict[keyValuePair.Key].MatchString = match.Item1;
-                    Avatar.VisemesDict[keyValuePair.Key].SkinnedMeshRenderer = match.Item2;
-                    Avatar.VisemesDict[keyValuePair.Key].BlendshapeIndex = match.Item3;
-                }
-                else if (selected == 0)
-                    Avatar.VisemesDict[keyValuePair.Key] = null;
+                EditorGUILayout.EndHorizontal();
             }
         }
 
@@ -213,7 +231,7 @@ namespace Hypernex.CCK.Editor.Editors
                         }
                     }
                     if (!UseCombinedEyeBlendshapes.boolValue)
-                        DrawEye(ref Avatar.LeftEyeBlendshapes, UseLeftEyeBoneInstead.boolValue);
+                        DrawEye(Avatar.LeftEyeBlendshapes, UseLeftEyeBoneInstead.boolValue);
                     EditorGUILayout.Separator();
                     GUILayout.Label("Right Eye", EditorStyles.miniBoldLabel);
                     UseRightEyeBoneInstead.boolValue = EditorGUILayout.Toggle("Use Transform",
@@ -246,12 +264,12 @@ namespace Hypernex.CCK.Editor.Editors
                         }
                     }
                     if (!UseCombinedEyeBlendshapes.boolValue)
-                        DrawEye(ref Avatar.RightEyeBlendshapes, UseRightEyeBoneInstead.boolValue);
+                        DrawEye(Avatar.RightEyeBlendshapes, UseRightEyeBoneInstead.boolValue);
                     GUILayout.Label("Combined Eye", EditorStyles.miniBoldLabel);
                     UseCombinedEyeBlendshapes.boolValue = EditorGUILayout.Toggle("Use Combined BlendShapes",
                         UseCombinedEyeBlendshapes.boolValue);
                     if (UseCombinedEyeBlendshapes.boolValue)
-                        DrawEye(ref Avatar.EyeBlendshapes, false);
+                        DrawEye(Avatar.EyeBlendshapes, false);
                 }
             }
             EditorGUILayout.Separator();

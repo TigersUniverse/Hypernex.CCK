@@ -7,14 +7,17 @@ using System.Linq;
 using System.Threading;
 using Hypernex.CCK.Editor.Editors.Tools;
 using Hypernex.CCK.Unity;
+using HypernexSharp.API;
+using HypernexSharp.API.APIResults;
 using HypernexSharp.APIObjects;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
-using UnityEngine.XR;
 using Avatar = Hypernex.CCK.Unity.Avatar;
+using LoginResult = HypernexSharp.APIObjects.LoginResult;
+
 // ReSharper disable ObjectCreationAsStatement
 
 namespace Hypernex.CCK.Editor.Editors
@@ -143,6 +146,12 @@ namespace Hypernex.CCK.Editor.Editors
                     Logger.CurrentLogger.Warn("Incorrect Username or Password");
                     break;
             }
+            if (result != LoginResult.Correct)
+            {
+                AuthManager.Instance = null;
+                AuthManager.CurrentUser = null;
+                AuthManager.CurrentToken = null;
+            }
         }
         
         // https://stackoverflow.com/a/250400/12968919
@@ -212,16 +221,22 @@ namespace Hypernex.CCK.Editor.Editors
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Switch to Standalone"))
             {
-                EditorUtility.SetDirty(SelectedAvatar.gameObject);
+                if(SelectedAvatar != null)
+                {
+                    EditorUtility.SetDirty(SelectedAvatar.gameObject);
+                    AssetDatabase.SaveAssets();
+                }
                 AssetDatabase.SaveAssets();
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone,
                     BuildTarget.StandaloneWindows64);
             }
-
             if (GUILayout.Button("Switch to Android"))
             {
-                EditorUtility.SetDirty(SelectedAvatar.gameObject);
-                AssetDatabase.SaveAssets();
+                if(SelectedAvatar != null)
+                {
+                    EditorUtility.SetDirty(SelectedAvatar.gameObject);
+                    AssetDatabase.SaveAssets();
+                }
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android,
                     BuildTarget.Android);
             }
@@ -241,6 +256,28 @@ namespace Hypernex.CCK.Editor.Editors
             GUILayout.EndScrollView();
         }
 
+        private void OnAvatarUpload(CallbackResult<UploadResult> result)
+        {
+            isBuilding = false;
+            if (result.success)
+            {
+                EditorTools.InvokeOnMainThread((Action)(() =>
+                {
+                    if(!string.IsNullOrEmpty(result.result.AvatarId))
+                        SelectedAvatar.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.AvatarId);
+                    EditorUtility.DisplayDialog("Hypernex.CCK", "Avatar Uploaded!", "OK");
+                }));
+            }
+            else
+            {
+                EditorTools.InvokeOnMainThread((Action)(() =>
+                {
+                    Logger.CurrentLogger.Warn(result.message);
+                    EditorUtility.DisplayDialog("Hypernex.CCK", "Failed to upload avatar!", "OK");
+                }));
+            }
+        }
+
         private void FinishAvatarBuild(TempDir tempDir)
         {
             string assetPath = EditorTools.BuildAssetBundle(SelectedAvatar, tempDir);
@@ -248,31 +285,33 @@ namespace Hypernex.CCK.Editor.Editors
             {
                 FileStream fileStream = new FileStream(assetPath, FileMode.Open, FileAccess.Read,
                     FileShare.Delete | FileShare.Read);
-                AuthManager.Instance.HypernexObject.UploadAvatar(result =>
+                if (fileStream.Length > 1048576 * 90)
+                {
+                    string td = tempDir.CreateChildDirectory("fileParts");
+                    new Thread(() =>
                     {
-                        isBuilding = false;
-                        if (result.success)
+                        AuthManager.Instance.HypernexObject.UploadPart(result =>
                         {
-                            EditorTools.InvokeOnMainThread((Action)(() =>
+                            EditorTools.InvokeOnMainThread((Action) delegate
                             {
-                                if(!string.IsNullOrEmpty(result.result.AvatarId))
-                                    SelectedAvatar.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.AvatarId);
-                                EditorUtility.DisplayDialog("Hypernex.CCK", "Avatar Uploaded!", "OK");
-                            }));
-                        }
-                        else
+                                OnAvatarUpload(result);
+                                fileStream.Dispose();
+                                tempDir.Dispose();
+                            });
+                        }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, SelectedAvatar.Meta);
+                    }).Start();
+                }
+                else
+                    AuthManager.Instance.HypernexObject.UploadAvatar(result =>
                         {
-                            EditorTools.InvokeOnMainThread((Action)(() =>
-                            {
-                                Logger.CurrentLogger.Warn(result.message);
-                                EditorUtility.DisplayDialog("Hypernex.CCK", "Failed to upload avatar!", "OK");
-                            }));
-                        }
-                        fileStream.Dispose();
-                        tempDir.Dispose();
-                    }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
-                    SelectedAvatar.Meta);
+                            OnAvatarUpload(result);
+                            fileStream.Dispose();
+                            tempDir.Dispose();
+                        }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
+                        SelectedAvatar.Meta);
             }
+            else
+                isBuilding = false;
         }
 
         private Vector2 avatarTagsScroll;
@@ -468,6 +507,28 @@ namespace Hypernex.CCK.Editor.Editors
             }, AuthManager.CurrentUser, AuthManager.CurrentToken, fs);
         }
 
+        private void OnWorldUpload(CallbackResult<UploadResult> result)
+        {
+            isBuilding = false;
+            if (result.success)
+            {
+                EditorTools.InvokeOnMainThread((Action)(() =>
+                {
+                    if(!string.IsNullOrEmpty(result.result.WorldId))
+                        World.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.WorldId);
+                    EditorUtility.DisplayDialog("Hypernex.CCK", "World Uploaded!", "OK");
+                }));
+            }
+            else
+            {
+                EditorTools.InvokeOnMainThread((Action)(() =>
+                {
+                    Logger.CurrentLogger.Warn(result.message);
+                    EditorUtility.DisplayDialog("Hypernex.CCK", "Failed to upload world!", "OK");
+                }));
+            }
+        }
+
         private void FinishWorldBuild(TempDir tempDir)
         {
             UploadAllScripts(World.ServerScripts, scriptsURLs =>
@@ -482,31 +543,33 @@ namespace Hypernex.CCK.Editor.Editors
                 {
                     FileStream fileStream = new FileStream(assetPath, FileMode.Open, FileAccess.Read,
                         FileShare.Delete | FileShare.Read);
-                    AuthManager.Instance.HypernexObject.UploadWorld(result =>
+                    if(fileStream.Length > 1048576 * 90)
+                    {
+                        string td = tempDir.CreateChildDirectory("fileParts");
+                        new Thread(() =>
                         {
-                            isBuilding = false;
-                            if (result.success)
+                            AuthManager.Instance.HypernexObject.UploadPart(result =>
                             {
-                                EditorTools.InvokeOnMainThread((Action)(() =>
+                                EditorTools.InvokeOnMainThread((Action)delegate
                                 {
-                                    if(!string.IsNullOrEmpty(result.result.WorldId))
-                                        World.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.WorldId);
-                                    EditorUtility.DisplayDialog("Hypernex.CCK", "World Uploaded!", "OK");
-                                }));
-                            }
-                            else
+                                    OnWorldUpload(result);
+                                    fileStream.Dispose();
+                                    tempDir.Dispose();
+                                });
+                            }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, null, World.Meta);
+                        }).Start();
+                    }
+                    else
+                        AuthManager.Instance.HypernexObject.UploadWorld(result =>
                             {
-                                EditorTools.InvokeOnMainThread((Action)(() =>
-                                {
-                                    Logger.CurrentLogger.Warn(result.message);
-                                    EditorUtility.DisplayDialog("Hypernex.CCK", "Failed to upload world!", "OK");
-                                }));
-                            }
-                            fileStream.Dispose();
-                            tempDir.Dispose();
-                        }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
-                        World.Meta);
+                                OnWorldUpload(result);
+                                fileStream.Dispose();
+                                tempDir.Dispose();
+                            }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
+                            World.Meta);
                 }
+                else
+                    isBuilding = false;
             }, tempDir);
         }
 

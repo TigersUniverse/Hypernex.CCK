@@ -42,13 +42,12 @@ namespace Hypernex.CCK.Unity.Internals
         }
 
         [Serializable]
-        public class ExtraEyeBlendshapeDict : SerializedDictionary<ExtraEyeExpressions, BlendshapeDescriptor>
+        public class ExtraEyeBlendshapeDict : SerializedDictionary<ExtraEyeExpressions, BlendshapeDescriptors>
         {
-            public ExtraEyeBlendshapeDict(ExtraEyeBlendshapeDict copy) : base(
-                new List<ExtraEyeExpressions>(copy.Keys.ToList()),
-                new List<BlendshapeDescriptor>(copy.Values.ToList())){}
-
-            public ExtraEyeBlendshapeDict(IDictionary<ExtraEyeExpressions, BlendshapeDescriptor> i) : base(i){}
+            public ExtraEyeBlendshapeDict(ExtraEyeBlendshapeDict e) : base(
+                new List<ExtraEyeExpressions>(e.Keys.ToList()), new List<BlendshapeDescriptors>(e.Values.ToList())) {}
+            
+            public ExtraEyeBlendshapeDict(IDictionary<ExtraEyeExpressions, BlendshapeDescriptors> i) : base(i){}
         }
 
         [Serializable]

@@ -56,11 +56,12 @@ namespace Hypernex.CCK.Editor
 
         public string GetPath() => path;
 
-        public void CreateChildDirectory(string name)
+        public string CreateChildDirectory(string name)
         {
             string p = Path.Combine(path, name);
             if (!Directory.Exists(p))
                 Directory.CreateDirectory(p);
+            return p;
         }
 
         public FileStream CreateFile(string file, byte[] data)

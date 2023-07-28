@@ -47,25 +47,34 @@ namespace Hypernex.CCK.Editor.Editors
                     if (keyValuePair.Value != null && keyValuePair.Value.MatchString == options[i])
                         index = i;
                 }
-                int selected = EditorGUILayout.Popup(keyValuePair.Key.ToString(), index, options);
-                (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
-                foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                //int selected = EditorGUILayout.Popup(keyValuePair.Key.ToString(), index, options);
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label(keyValuePair.Key.ToString());
+                if (GUILayout.Button(options[index]))
                 {
-                    if (valueTuple.Item1 == options[selected])
-                        match = valueTuple;
+                    BlendshapeSelector.ShowWindow(options, selected =>
+                    {
+                        (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
+                        foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                        {
+                            if (valueTuple.Item1 == options[selected])
+                                match = valueTuple;
+                        }
+                        if (!string.IsNullOrEmpty(match.Item1))
+                        {
+                            if (faceTrackingDescriptor.FaceValues[keyValuePair.Key] == null)
+                                faceTrackingDescriptor.FaceValues[keyValuePair.Key] = new BlendshapeDescriptor();
+                            else if(faceTrackingDescriptor.FaceValues[keyValuePair.Key].MatchString != match.Item1)
+                                EditorUtility.SetDirty(faceTrackingDescriptor.gameObject);
+                            faceTrackingDescriptor.FaceValues[keyValuePair.Key].MatchString = match.Item1;
+                            faceTrackingDescriptor.FaceValues[keyValuePair.Key].SkinnedMeshRenderer = match.Item2;
+                            faceTrackingDescriptor.FaceValues[keyValuePair.Key].BlendshapeIndex = match.Item3;
+                        }
+                        else if (selected == 0)
+                            faceTrackingDescriptor.FaceValues[keyValuePair.Key] = null;
+                    });
                 }
-                if (!string.IsNullOrEmpty(match.Item1))
-                {
-                    if (faceTrackingDescriptor.FaceValues[keyValuePair.Key] == null)
-                        faceTrackingDescriptor.FaceValues[keyValuePair.Key] = new BlendshapeDescriptor();
-                    else if(faceTrackingDescriptor.FaceValues[keyValuePair.Key].MatchString != match.Item1)
-                        EditorUtility.SetDirty(faceTrackingDescriptor.gameObject);
-                    faceTrackingDescriptor.FaceValues[keyValuePair.Key].MatchString = match.Item1;
-                    faceTrackingDescriptor.FaceValues[keyValuePair.Key].SkinnedMeshRenderer = match.Item2;
-                    faceTrackingDescriptor.FaceValues[keyValuePair.Key].BlendshapeIndex = match.Item3;
-                }
-                else if (selected == 0)
-                    faceTrackingDescriptor.FaceValues[keyValuePair.Key] = null;
+                EditorGUILayout.EndHorizontal();
             }
         }
         
@@ -88,34 +97,60 @@ namespace Hypernex.CCK.Editor.Editors
             options[0] = "None";
             for (int i = 1; i < options.Length; i++)
                 options[i] = m.ElementAt(i - 1).Item1;
-            foreach (KeyValuePair<ExtraEyeExpressions,BlendshapeDescriptor> keyValuePair in new 
+            foreach (KeyValuePair<ExtraEyeExpressions,BlendshapeDescriptors> keyValuePair in new 
                          SerializedDictionaries.ExtraEyeBlendshapeDict(faceTrackingDescriptor.ExtraEyeValues))
             {
-                int index = 0;
-                for(int i = 0; i < options.Length; i++)
+                GUILayout.Label(keyValuePair.Key.ToString());
+                int y = 0;
+                foreach (BlendshapeDescriptor blendshapeDescriptor in new List<BlendshapeDescriptor>(keyValuePair.Value.Descriptors))
                 {
-                    if (keyValuePair.Value != null && keyValuePair.Value.MatchString == options[i])
-                        index = i;
+                    int index = 0;
+                    for(int i = 0; i < options.Length; i++)
+                    {
+                        if (blendshapeDescriptor != null && blendshapeDescriptor.MatchString == options[i])
+                            index = i;
+                    }
+                    //int selected = EditorGUILayout.Popup(index, options);
+                    if (GUILayout.Button(options[index]))
+                    {
+                        BlendshapeSelector.ShowWindow(options, selected =>
+                        {
+                            (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
+                            foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                            {
+                                if (valueTuple.Item1 == options[selected])
+                                    match = valueTuple;
+                            }
+                            if (!string.IsNullOrEmpty(match.Item1))
+                            {
+                                if(faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors[y].MatchString != match.Item1)
+                                    EditorUtility.SetDirty(faceTrackingDescriptor.gameObject);
+                                faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors[y].MatchString = match.Item1;
+                                faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors[y].SkinnedMeshRenderer = match.Item2;
+                                faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors[y].BlendshapeIndex = match.Item3;
+                            }
+                            else if (selected == 0)
+                                faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors[y] = new BlendshapeDescriptor();
+                        });
+                    }
+                    y++;
                 }
-                int selected = EditorGUILayout.Popup(keyValuePair.Key.ToString(), index, options);
-                (string, SkinnedMeshRenderer, int) match = (String.Empty, null, -1);
-                foreach ((string, SkinnedMeshRenderer, int) valueTuple in m)
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Add"))
                 {
-                    if (valueTuple.Item1 == options[selected])
-                        match = valueTuple;
+                    faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors.Add(new BlendshapeDescriptor());
+                    EditorUtility.SetDirty(faceTrackingDescriptor.gameObject);
                 }
-                if (!string.IsNullOrEmpty(match.Item1))
+                if (GUILayout.Button("Remove"))
                 {
-                    if (faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key] == null)
-                        faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key] = new BlendshapeDescriptor();
-                    else if(faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].MatchString != match.Item1)
+                    if (faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors.Count > 0)
+                    {
+                        faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors
+                            .RemoveAt(faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].Descriptors.Count - 1);
                         EditorUtility.SetDirty(faceTrackingDescriptor.gameObject);
-                    faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].MatchString = match.Item1;
-                    faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].SkinnedMeshRenderer = match.Item2;
-                    faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key].BlendshapeIndex = match.Item3;
+                    }
                 }
-                else if (selected == 0)
-                    faceTrackingDescriptor.ExtraEyeValues[keyValuePair.Key] = null;
+                EditorGUILayout.EndHorizontal();
             }
         }
 

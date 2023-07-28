@@ -65,6 +65,7 @@
         <Compile Include="AnimatorPlayable.cs" />
         <Compile Include="AssetIdentifier.cs" />
         <Compile Include="Avatar.cs" />
+        <Compile Include="BlendshapeDescriptors.cs" />
         <Compile Include="CustomPlayableAnimator.cs" />
         <Compile Include="EyeBlendshapeAction.cs" />
         <Compile Include="FaceTrackingDescriptor.cs" />

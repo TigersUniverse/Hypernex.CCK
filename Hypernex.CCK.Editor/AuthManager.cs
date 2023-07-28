@@ -2,7 +2,6 @@
 using System.Linq;
 using HypernexSharp;
 using HypernexSharp.APIObjects;
-using UnityEngine;
 
 namespace Hypernex.CCK.Editor
 {

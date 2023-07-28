@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Hypernex.CCK.Unity.Internals;
 using UnityEngine;
 
@@ -103,9 +104,9 @@ namespace Hypernex.CCK.Unity
             });
 
         public SerializedDictionaries.ExtraEyeBlendshapeDict ExtraEyeValues =
-            new SerializedDictionaries.ExtraEyeBlendshapeDict(new Dictionary<ExtraEyeExpressions, BlendshapeDescriptor>
+            new SerializedDictionaries.ExtraEyeBlendshapeDict(new Dictionary<ExtraEyeExpressions, BlendshapeDescriptors>
             {
-                [ExtraEyeExpressions.PupilDilation] = null
+                [ExtraEyeExpressions.PupilDilation] = new BlendshapeDescriptors()
             });
     }
 
