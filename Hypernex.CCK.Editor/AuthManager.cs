@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Hypernex.CCK.Editor.Editors.Tools;
 using HypernexSharp;
 using HypernexSharp.APIObjects;
 
@@ -37,6 +38,25 @@ namespace Hypernex.CCK.Editor
             return false;
         }
 
+        public bool IsAuthRequiredForBuilds => AuthRequiredForBuild == 1;
+        
+        private int AuthRequiredForBuild = -1;
+        private void IsAuthRequiredForBuild()
+        {
+            if (HypernexObject == null)
+                return;
+            HypernexObject.AuthForBuilds(result =>
+            {
+                if(!result.success)
+                {
+                    IsAuthRequiredForBuild();
+                    return;
+                }
+                EditorTools.InvokeOnMainThread(new Action(() =>
+                    AuthRequiredForBuild = result.result.AuthForBuilds ? 1 : 0));
+            });
+        }
+
         internal AuthManager(string targetDomain, string username, string email, string password, string inviteCode,
             Action onDone = null)
         {
@@ -55,6 +75,7 @@ namespace Hypernex.CCK.Editor
                     CurrentUser = result.result.UserData;
                     CurrentToken = result.result.UserData.AccountTokens.First();
                     SaveToConfig();
+                    IsAuthRequiredForBuild();
                     onDone?.Invoke();
                 }
                 else
@@ -87,6 +108,7 @@ namespace Hypernex.CCK.Editor
                                 CurrentToken = result.result.Token;
                                 CurrentUser = r.result.UserData;
                                 SaveToConfig();
+                                IsAuthRequiredForBuild();
                                 onDone?.Invoke(LoginResult.Correct, null, null);
                             }
                             else
@@ -125,6 +147,7 @@ namespace Hypernex.CCK.Editor
                             {
                                 CurrentToken = result.result.Token;
                                 CurrentUser = r.result.UserData;
+                                IsAuthRequiredForBuild();
                                 onDone?.Invoke(LoginResult.Correct, null, null);
                             }
                             else
@@ -149,6 +172,7 @@ namespace Hypernex.CCK.Editor
                 else
                     throw new Exception("Failed to get User Data");
             });
+            IsAuthRequiredForBuild();
         }
 
         private void SaveToConfig()

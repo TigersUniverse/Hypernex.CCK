@@ -82,6 +82,9 @@ namespace Hypernex.CCK.Unity
         public List<CustomPlayableAnimator> Animators = new List<CustomPlayableAnimator>();
         public List<NexboxScript> LocalAvatarScripts = new List<NexboxScript>();
 
+        public bool ShowAllParameters;
+        public List<string> VisibleParameters = new List<string>();
+
         // Editor only Things
         [SerializeField] public AvatarMeta Meta;
         [SerializeField] public bool ReplaceImage;

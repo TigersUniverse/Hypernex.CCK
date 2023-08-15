@@ -31,6 +31,7 @@ namespace Hypernex.CCK.Editor.Editors
         private SerializedProperty RightEyeLeftLimit;
         private SerializedProperty RightEyeRightLimit;
         private SerializedProperty UseCombinedEyeBlendshapes;
+        private SerializedProperty ShowAllParameters;
         private Avatar Avatar;
 
         private void OnEnable()
@@ -52,11 +53,13 @@ namespace Hypernex.CCK.Editor.Editors
             RightEyeLeftLimit = serializedObject.FindProperty("RightEyeLeftLimit");
             RightEyeRightLimit = serializedObject.FindProperty("RightEyeRightLimit");
             UseCombinedEyeBlendshapes = serializedObject.FindProperty("UseCombinedEyeBlendshapes");
+            ShowAllParameters = serializedObject.FindProperty("ShowAllParameters");
             Avatar = target as Avatar;
         }
 
         private static bool an;
         private static bool avs;
+        private static bool dvp;
         private static bool em;
         private static bool er = true;
         private static bool dv;
@@ -339,6 +342,13 @@ namespace Hypernex.CCK.Editor.Editors
                             scriptEditorInstance.RemoveScript();
                     }
                 });
+            EditorGUILayout.Separator();
+            EditorGUILayout.HelpBox("Visible Parameters Describe which Parameters should be visible in the UI. " +
+                                    "Select \"Show All Parameters\" if you'd like all parameters to be displayed",
+                MessageType.Info);
+            ShowAllParameters.boolValue = EditorGUILayout.Toggle("Show All Parameters", ShowAllParameters.boolValue);
+            EditorTools.ADrawObjectList(Avatar.VisibleParameters, "Visible Parameters", ref dvp,
+                () => EditorUtility.SetDirty(Avatar.gameObject));
             serializedObject.ApplyModifiedProperties();
             //base.OnInspectorGUI();
         }

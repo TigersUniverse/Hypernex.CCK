@@ -856,7 +856,7 @@ namespace Hypernex.CCK.Editor.Editors
                         RenderWorld();
                         if(GUILayout.Button("Refresh User"))
                             AuthManager.Instance.Refresh();
-                        if (GUILayout.Button("Sign Out"))
+                        if (GUILayout.Button($"Sign Out ({AuthManager.CurrentUser.Username})"))
                         {
                             EditorConfig.LoadedConfig.TargetDomain = String.Empty;
                             EditorConfig.LoadedConfig.SavedUserId = String.Empty;
@@ -884,7 +884,7 @@ namespace Hypernex.CCK.Editor.Editors
                     RenderAvatarList();
                     if(GUILayout.Button("Refresh User"))
                         AuthManager.Instance.Refresh();
-                    if (GUILayout.Button("Sign Out"))
+                    if (GUILayout.Button($"Sign Out ({AuthManager.CurrentUser.Username})"))
                     {
                         EditorConfig.LoadedConfig.TargetDomain = String.Empty;
                         EditorConfig.LoadedConfig.SavedUserId = String.Empty;

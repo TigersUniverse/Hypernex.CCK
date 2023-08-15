@@ -31,8 +31,6 @@
         <PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
     </ItemGroup>
     <ItemGroup>
-      <Reference Include="Hypernex.CCK">
-        <HintPath>..\build\Hypernex.CCK.dll</HintPath>
-      </Reference>
+      <ProjectReference Include="..\Hypernex.CCK\Hypernex.CCK.csproj" />
     </ItemGroup>
 </Project>
