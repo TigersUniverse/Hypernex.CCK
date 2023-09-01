@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -405,7 +403,7 @@ namespace Hypernex.CCK.Editor.Editors
                                     AssetDatabase.Refresh();
                                 }
                             }*/
-                            (FileStream, Bitmap)? b = Imaging.GetBitmapFromAsset(SelectedAvatar.Image);
+                            (FileStream, Texture2D)? b = Imaging.GetBitmapFromAsset(SelectedAvatar.Image);
                             if (b == null)
                             {
                                 Logger.CurrentLogger.Warn("Failed to upload sprite at " + spriteAssetPath);
@@ -413,8 +411,7 @@ namespace Hypernex.CCK.Editor.Editors
                             }
                             else
                             {
-                                MemoryStream ms = new MemoryStream();
-                                b.Value.Item2.Save(ms, ImageFormat.Png);
+                                MemoryStream ms = new MemoryStream(b.Value.Item2.EncodeToPNG());
                                 FileStream g = thumbnailTempDir.CreateFile("thumbnail.png", ms.ToArray());
                                 AuthManager.Instance.HypernexObject.UploadFile(result =>
                                 {
@@ -428,7 +425,6 @@ namespace Hypernex.CCK.Editor.Editors
                                         Logger.CurrentLogger.Warn("Sprite at " + spriteAssetPath + " failed to upload!");
                                     ms.Dispose();
                                     g.Dispose();
-                                    b.Value.Item2.Dispose();
                                     b.Value.Item1.Dispose();
                                     thumbnailTempDir.Dispose();
                                 }, AuthManager.CurrentUser, AuthManager.CurrentToken, g);
@@ -603,7 +599,7 @@ namespace Hypernex.CCK.Editor.Editors
                 }
             }
             string file = Path.Combine(t.GetPath(), "Icons", icon.texture.name + ".png");*/
-            (FileStream, Bitmap)? b = Imaging.GetBitmapFromAsset(icon);
+            (FileStream, Texture2D)? b = Imaging.GetBitmapFromAsset(icon);
             if (b == null)
             {
                 icons.RemoveAt(0);
@@ -614,8 +610,7 @@ namespace Hypernex.CCK.Editor.Editors
             }
             else
             {
-                MemoryStream ms = new MemoryStream();
-                b.Value.Item2.Save(ms, ImageFormat.Png);
+                MemoryStream ms = new MemoryStream(b.Value.Item2.EncodeToPNG());
                 FileStream g = t.CreateFile(Path.Combine("Icons", "icon" + result.Count + ".png"), ms.ToArray());
                 AuthManager.Instance.HypernexObject.UploadFile(r =>
                 {
@@ -625,7 +620,6 @@ namespace Hypernex.CCK.Editor.Editors
                     icons.RemoveAt(0);
                     ms.Dispose();
                     g.Dispose();
-                    b.Value.Item2.Dispose();
                     b.Value.Item1.Dispose();
                     if(icons.Count > 0)
                         UploadAllWorldIcons(t, icons, onFiles, result);
@@ -734,7 +728,7 @@ namespace Hypernex.CCK.Editor.Editors
                                 }
                             }
                             string imagePath = Path.Combine(tempDir.GetPath(), "thumbnail.png");*/
-                            (FileStream, Bitmap)? b = Imaging.GetBitmapFromAsset(World.Thumbnail);
+                            (FileStream, Texture2D)? b = Imaging.GetBitmapFromAsset(World.Thumbnail);
                             if (b == null)
                             {
                                 Logger.CurrentLogger.Warn("Failed to get sprite at " + spriteAssetPath);
@@ -742,8 +736,7 @@ namespace Hypernex.CCK.Editor.Editors
                             }
                             else
                             {
-                                MemoryStream gg = new MemoryStream();
-                                b.Value.Item2.Save(gg, ImageFormat.Png);
+                                MemoryStream gg = new MemoryStream(b.Value.Item2.EncodeToPNG());
                                 FileStream g = tempDir.CreateFile("thumbnail.png", gg.ToArray());
                                 AuthManager.Instance.HypernexObject.UploadFile(result =>
                                 {
@@ -755,7 +748,6 @@ namespace Hypernex.CCK.Editor.Editors
                                     }
                                     else
                                         Logger.CurrentLogger.Warn("Sprite at " + spriteAssetPath + " failed to upload!");
-                                    b.Value.Item2.Dispose();
                                     b.Value.Item1.Dispose();
                                     g.Dispose();
                                     gg.Dispose();
@@ -822,10 +814,7 @@ namespace Hypernex.CCK.Editor.Editors
             if (Window != null)
             {
                 // must end area after header!
-                // TODO: Gets really laggy after scene reload
-                /*Imaging.DrawHeader("Hypernex.CCK.Editor.Resources.banner.png",
-                    new Vector2(Window.position.x, Window.position.y),
-                    new Vector2(Window.position.width, Window.position.height));*/
+                Imaging.DrawHeader(new Vector2(Window.position.width, Window.position.height));
                 if (banStatus != null)
                     RenderBan();
                 else if(warnStatus != null)
@@ -900,7 +889,7 @@ namespace Hypernex.CCK.Editor.Editors
                 }
                 else
                     AllowBuild = VerifyProject();
-                /*GUILayout.EndArea();*/
+                GUILayout.EndArea();
             }
         }
     }
