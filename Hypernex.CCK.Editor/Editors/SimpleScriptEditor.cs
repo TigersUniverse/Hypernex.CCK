@@ -20,11 +20,14 @@ namespace Hypernex.CCK.Editor.Editors
 
         private NexboxScript script;
         private string Text;
+        private Vector2 textScroll;
 
         private void OnGUI()
         {
             EditorTools.NewGUILine();
+            textScroll = GUILayout.BeginScrollView(textScroll);
             Text = GUILayout.TextArea(Text, GUILayout.MaxHeight(Int32.MaxValue));
+            GUILayout.EndScrollView();
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Save and Close"))
             {
