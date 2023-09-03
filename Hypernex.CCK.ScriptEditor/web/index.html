@@ -13,6 +13,7 @@
 			let editor
 			let url = new URL(window.location)
 			const id = url.searchParams.get("id")
+			const close = url.searchParams.get("close")
 			let ws = new WebSocket("ws://localhost:" + url.searchParams.get("wsport") + "/scripting")
 			ws.addEventListener("open", () => ws.send(JSON.stringify({message: "request", id: id})))
 			ws.addEventListener("message", event => {
@@ -50,6 +51,8 @@
 					id: id
 				}
 				ws.send(JSON.stringify(o))
+				if(close)
+					window.close()
 			})
 		</script>
 	</body>

@@ -73,6 +73,7 @@
         <Compile Include="Internals\SerializedDictionaries.cs" />
         <Compile Include="Internals\SerializedDictionary.cs" />
         <Compile Include="Internals\BlendshapeDescriptor.cs" />
+        <Compile Include="LocalScript.cs" />
         <Compile Include="MaterialDescriptor.cs" />
         <Compile Include="NetworkSyncDescriptor.cs" />
         <Compile Include="PluginLoader.cs" />

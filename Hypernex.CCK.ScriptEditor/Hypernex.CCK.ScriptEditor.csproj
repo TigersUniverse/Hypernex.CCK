@@ -6,6 +6,7 @@
         <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
         <TrimMode>copyused</TrimMode>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationIcon>web\favicon.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
         <None Remove=".gitignore" />
@@ -32,5 +33,9 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Hypernex.CCK\Hypernex.CCK.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="web\favicon.ico" />
+      <AvaloniaResource Include="web\favicon.ico" />
     </ItemGroup>
 </Project>

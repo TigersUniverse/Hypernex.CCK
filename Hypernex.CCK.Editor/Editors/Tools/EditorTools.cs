@@ -339,6 +339,38 @@ namespace Hypernex.CCK.Editor.Editors.Tools
                 }
             }
         }
+        
+        public static void DrawScriptEditorOnCustomEvent(LocalScript LocalScript, ref NexboxScript script)
+        {
+            EditorGUILayout.BeginHorizontal();
+            if (ScriptEditorInstance.IsOpen)
+            {
+                if (GUILayout.Button("Open Script in Hypernex Script Editor"))
+                {
+                    ScriptEditorInstance scriptEditorInstance =
+                        ScriptEditorInstance.GetInstanceFromScript(script);
+                    if (scriptEditorInstance == null)
+                        scriptEditorInstance = new ScriptEditorInstance(script,
+                            s =>
+                            {
+                                // TODO fix Set Dirty (not threading issue)
+                                InvokeOnMainThread((Action)(() =>
+                                {
+                                    LocalScript.NexboxScript.Script = s;
+                                    EditorUtility.SetDirty(LocalScript.gameObject);
+                                }));
+                            });
+                    scriptEditorInstance.CreateScript();
+                }
+            }
+            else
+                GUILayout.Label("Not Connected");
+
+            if (GUILayout.Button("Open Script in Text Editor"))
+                SimpleScriptEditor.ShowWindow(script, () => EditorUtility.SetDirty(LocalScript.gameObject));
+            EditorGUILayout.EndHorizontal();
+            NewGUILine();
+        }
 
         public static void DrawScriptEditorOnCustomEvent(Avatar Avatar, ref NexboxScript script, int index)
         {
@@ -404,6 +436,25 @@ namespace Hypernex.CCK.Editor.Editors.Tools
             NewGUILine();
         }
 
+        public static void MakeSave(Scene? s = null)
+        {
+            if (!s.HasValue)
+                s = SceneManager.GetActiveScene();
+            EditorSceneManager.MarkSceneDirty(s.Value);
+            EditorSceneManager.SaveScene(s.Value);
+            AssetDatabase.SaveAssets();
+        }
+
+        public static void MakeSave(Object o, Scene? s = null)
+        {
+            if (!s.HasValue)
+                s = SceneManager.GetActiveScene();
+            EditorSceneManager.MarkSceneDirty(s.Value);
+            EditorUtility.SetDirty(o);
+            EditorSceneManager.SaveScene(s.Value);
+            AssetDatabase.SaveAssets();
+        }
+
         public static string BuildAssetBundle(Avatar avatar, TempDir tempDir)
         {
             bool didSavePrefab;
@@ -458,8 +509,9 @@ namespace Hypernex.CCK.Editor.Editors.Tools
             Scene currentScene = SceneManager.GetActiveScene();
             List<NexboxScript> oldServerScripts = new List<NexboxScript>(w.ServerScripts);
             w.ServerScripts.Clear();
-            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+            /*EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());*/
+            MakeSave(w);
             string[] assets = { currentScene.path };
             AssetBundleBuild[] builds = new AssetBundleBuild[1];
             builds[0].assetBundleName = id;
@@ -469,8 +521,9 @@ namespace Hypernex.CCK.Editor.Editors.Tools
                 EditorUserBuildSettings.activeBuildTarget);
             EditorSceneManager.OpenScene(currentScene.path);
             w.ServerScripts = oldServerScripts;
-            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+            MakeSave(w);
+            /*EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());*/
             foreach (string assetBundle in Directory.GetFiles(abp))
             {
                 string assetBundleName = Path.GetFileName(assetBundle);

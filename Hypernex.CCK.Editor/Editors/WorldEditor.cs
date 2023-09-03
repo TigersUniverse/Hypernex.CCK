@@ -1,7 +1,6 @@
 ﻿using Hypernex.CCK.Editor.Editors.Tools;
 using Hypernex.CCK.Unity;
 using UnityEditor;
-using UnityEngine;
 
 namespace Hypernex.CCK.Editor.Editors
 {
@@ -14,6 +13,7 @@ namespace Hypernex.CCK.Editor.Editors
         private SerializedProperty WalkSpeed;
         private SerializedProperty RunSpeed;
         private SerializedProperty AllowRunning;
+        private SerializedProperty LockAvatarSwitching;
         private World World;
 
         private void OnEnable()
@@ -24,6 +24,7 @@ namespace Hypernex.CCK.Editor.Editors
             WalkSpeed = serializedObject.FindProperty("WalkSpeed");
             RunSpeed = serializedObject.FindProperty("RunSpeed");
             AllowRunning = serializedObject.FindProperty("AllowRunning");
+            LockAvatarSwitching = serializedObject.FindProperty("LockAvatarSwitching");
             World = target as World;
         }
 
@@ -37,6 +38,8 @@ namespace Hypernex.CCK.Editor.Editors
             serializedObject.Update();
             AllowRespawn.boolValue = EditorGUILayout.Toggle("Allow Respawn", AllowRespawn.boolValue);
             AllowRunning.boolValue = EditorGUILayout.Toggle("Allow Running", AllowRunning.boolValue);
+            LockAvatarSwitching.boolValue =
+                EditorGUILayout.Toggle("Lock Avatar Switching", LockAvatarSwitching.boolValue);
             EditorGUILayout.Separator();
             WalkSpeed.floatValue = EditorGUILayout.FloatField("Walk Speed", WalkSpeed.floatValue);
             RunSpeed.floatValue = EditorGUILayout.FloatField("Run Speed", RunSpeed.floatValue);

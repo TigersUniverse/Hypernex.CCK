@@ -221,8 +221,9 @@ namespace Hypernex.CCK.Editor.Editors
             {
                 if(SelectedAvatar != null)
                 {
-                    EditorUtility.SetDirty(SelectedAvatar.gameObject);
-                    AssetDatabase.SaveAssets();
+                    //EditorUtility.SetDirty(SelectedAvatar.gameObject);
+                    //AssetDatabase.SaveAssets();
+                    EditorTools.MakeSave(SelectedAvatar.gameObject);
                 }
                 AssetDatabase.SaveAssets();
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone,
@@ -232,9 +233,11 @@ namespace Hypernex.CCK.Editor.Editors
             {
                 if(SelectedAvatar != null)
                 {
-                    EditorUtility.SetDirty(SelectedAvatar.gameObject);
-                    AssetDatabase.SaveAssets();
+                    //EditorUtility.SetDirty(SelectedAvatar.gameObject);
+                    //AssetDatabase.SaveAssets();
+                    EditorTools.MakeSave(SelectedAvatar.gameObject);
                 }
+                AssetDatabase.SaveAssets();
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android,
                     BuildTarget.Android);
             }
@@ -259,12 +262,17 @@ namespace Hypernex.CCK.Editor.Editors
             isBuilding = false;
             if (result.success)
             {
-                EditorTools.InvokeOnMainThread((Action)(() =>
+                if(!string.IsNullOrEmpty(result.result.AvatarId))
                 {
-                    if(!string.IsNullOrEmpty(result.result.AvatarId))
-                        SelectedAvatar.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.AvatarId);
-                    EditorUtility.DisplayDialog("Hypernex.CCK", "Avatar Uploaded!", "OK");
-                }));
+                    EditorTools.InvokeOnMainThread((Action) delegate
+                    {
+                        AssetIdentifier assetIdentifier = SelectedAvatar.gameObject.GetComponent<AssetIdentifier>();
+                        assetIdentifier.SetId(result.result.AvatarId);
+                        EditorTools.MakeSave(assetIdentifier);
+                    });
+                }
+                EditorTools.InvokeOnMainThread((Action) (() =>
+                    EditorUtility.DisplayDialog("Hypernex.CCK", "Avatar Uploaded!", "OK")));
             }
             else
             {
@@ -378,8 +386,9 @@ namespace Hypernex.CCK.Editor.Editors
                     if (GUILayout.Button("Build Avatar!"))
                     {
                         isBuilding = true;
-                        EditorUtility.SetDirty(SelectedAvatar.gameObject);
-                        AssetDatabase.SaveAssets();
+                        //EditorUtility.SetDirty(SelectedAvatar.gameObject);
+                        //AssetDatabase.SaveAssets();
+                        EditorTools.MakeSave(SelectedAvatar.gameObject);
                         if (string.IsNullOrEmpty(SelectedAvatar.Meta.Name))
                         {
                             isBuilding = false;
@@ -511,7 +520,11 @@ namespace Hypernex.CCK.Editor.Editors
                 EditorTools.InvokeOnMainThread((Action)(() =>
                 {
                     if(!string.IsNullOrEmpty(result.result.WorldId))
-                        World.gameObject.GetComponent<AssetIdentifier>().SetId(result.result.WorldId);
+                    {
+                        AssetIdentifier assetIdentifier = World.gameObject.GetComponent<AssetIdentifier>();
+                        assetIdentifier.SetId(result.result.WorldId);
+                        EditorTools.MakeSave(assetIdentifier);
+                    }
                     EditorUtility.DisplayDialog("Hypernex.CCK", "World Uploaded!", "OK");
                 }));
             }
@@ -702,9 +715,7 @@ namespace Hypernex.CCK.Editor.Editors
                     if (GUILayout.Button("Build world!"))
                     {
                         isBuilding = true;
-                        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-                        EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
-                        AssetDatabase.SaveAssets();
+                        EditorTools.MakeSave();
                         if (string.IsNullOrEmpty(World.Meta.Name))
                         {
                             isBuilding = false;

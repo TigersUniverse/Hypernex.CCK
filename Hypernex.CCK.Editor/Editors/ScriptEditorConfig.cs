@@ -27,11 +27,15 @@ namespace Hypernex.CCK.Editor.Editors
                 {
                     case RuntimePlatform.WindowsEditor:
                         return 0;
+                    case RuntimePlatform.LinuxEditor:
+                        return 1;
                     default:
                         throw new Exception("Unsupported Platform " + Application.platform);
                 }
             }
         }
+
+        private static bool isDownloading;
 
         private string lastReadVersion;
 
@@ -62,6 +66,7 @@ namespace Hypernex.CCK.Editor.Editors
         {
             if (AuthManager.CurrentUser == null)
                 throw new Exception("Cannot Download Script Editor until Logged In!");
+            isDownloading = true;
             AuthManager.Instance.HypernexObject.GetVersions(result =>
             {
                 if (!result.success)
@@ -70,7 +75,10 @@ namespace Hypernex.CCK.Editor.Editors
                 if (latest == GetVersion())
                 {
                     EditorTools.InvokeOnMainThread(new Action(() =>
-                        EditorUtility.DisplayDialog("Hypernex.CCK", "Version already Up to Date!", "OK")));
+                    {
+                        isDownloading = false;
+                        EditorUtility.DisplayDialog("Hypernex.CCK", "Version already Up to Date!", "OK");
+                    }));
                     return;
                 }
                 if(Directory.Exists(DEFAULT_SCRIPT_EDITOR_LOCATION))
@@ -94,6 +102,7 @@ namespace Hypernex.CCK.Editor.Editors
                         {
                             EditorTools.InvokeOnMainThread(new Action(() =>
                             {
+                                isDownloading = false;
                                 EditorUtility.DisplayDialog("Hypernex.CCK", e.ToString(), "OK");
                             }));
                         }
@@ -102,6 +111,7 @@ namespace Hypernex.CCK.Editor.Editors
                         {
                             EditorConfig.LoadedConfig.ScriptEditorLocation = GetExecutable(DEFAULT_SCRIPT_EDITOR_LOCATION);
                             EditorConfig.SaveConfig(EditorConfig.GetEditorConfigLocation());
+                            isDownloading = false;
                             EditorUtility.DisplayDialog("Hypernex.CCK",
                                 "Downloaded and Installed Hypernex.CCK.ScriptEditor", "OK");
                         }));
@@ -123,8 +133,13 @@ namespace Hypernex.CCK.Editor.Editors
                 if (GUILayout.Button("Select Script Editor"))
                     EditorConfig.LoadedConfig.ScriptEditorLocation =
                         EditorUtility.OpenFilePanel("Select Hypernex Script Editor", "", "");
-                if(GUILayout.Button("Download and Install Script Editor"))
-                    DownloadAndInstallScriptEditor();
+                if (!isDownloading)
+                {
+                    if(GUILayout.Button("Download and Install Script Editor"))
+                        DownloadAndInstallScriptEditor();
+                }
+                else
+                    GUILayout.Label("Downloading...");
                 EditorGUILayout.EndHorizontal();
                 if (GUILayout.Button("Start Script Editor"))
                 {

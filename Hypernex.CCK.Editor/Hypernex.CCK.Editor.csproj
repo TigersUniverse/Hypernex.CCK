@@ -104,6 +104,7 @@
         <Compile Include="Editors\BlendshapeSelector.cs" />
         <Compile Include="Editors\ContentBuilder.cs" />
         <Compile Include="Editors\FaceTrackingDescriptorEditor.cs" />
+        <Compile Include="Editors\LocalScriptEditor.cs" />
         <Compile Include="Editors\MaterialDescriptorEditor.cs" />
         <Compile Include="Editors\RespawnableDescriptorEditor.cs" />
         <Compile Include="Editors\ScriptEditorConfig.cs" />

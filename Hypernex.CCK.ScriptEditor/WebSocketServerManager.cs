@@ -104,6 +104,7 @@ public class WebSocketServerManager
                         string id = node["id"].Value;
                         if (!Scripts.ContainsKey(id))
                             break;
+                        Scripts.Remove(id);
                         Dispatcher.UIThread.Post(() => MainWindow.Instance!.RemoveScript(id));
                         break;
                     }
