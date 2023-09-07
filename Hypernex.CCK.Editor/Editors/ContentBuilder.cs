@@ -9,10 +9,8 @@ using HypernexSharp.API;
 using HypernexSharp.API.APIResults;
 using HypernexSharp.APIObjects;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 using Avatar = Hypernex.CCK.Unity.Avatar;
 using LoginResult = HypernexSharp.APIObjects.LoginResult;
 
@@ -185,7 +183,7 @@ namespace Hypernex.CCK.Editor.Editors
                 warnStatus = null;
         }
 
-        private static bool isBuilding;
+        internal static bool isBuilding;
         private World World;
         private Avatar SelectedAvatar;
         private AssetIdentifier SelectedAssetIdentifier;

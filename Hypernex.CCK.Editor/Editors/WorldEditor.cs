@@ -13,6 +13,7 @@ namespace Hypernex.CCK.Editor.Editors
         private SerializedProperty WalkSpeed;
         private SerializedProperty RunSpeed;
         private SerializedProperty AllowRunning;
+        private SerializedProperty AllowScaling;
         private SerializedProperty LockAvatarSwitching;
         private World World;
 
@@ -24,6 +25,7 @@ namespace Hypernex.CCK.Editor.Editors
             WalkSpeed = serializedObject.FindProperty("WalkSpeed");
             RunSpeed = serializedObject.FindProperty("RunSpeed");
             AllowRunning = serializedObject.FindProperty("AllowRunning");
+            AllowScaling = serializedObject.FindProperty("AllowScaling");
             LockAvatarSwitching = serializedObject.FindProperty("LockAvatarSwitching");
             World = target as World;
         }
@@ -38,6 +40,7 @@ namespace Hypernex.CCK.Editor.Editors
             serializedObject.Update();
             AllowRespawn.boolValue = EditorGUILayout.Toggle("Allow Respawn", AllowRespawn.boolValue);
             AllowRunning.boolValue = EditorGUILayout.Toggle("Allow Running", AllowRunning.boolValue);
+            AllowScaling.boolValue = EditorGUILayout.Toggle("Allow Avatar Scaling", AllowScaling.boolValue);
             LockAvatarSwitching.boolValue =
                 EditorGUILayout.Toggle("Lock Avatar Switching", LockAvatarSwitching.boolValue);
             EditorGUILayout.Separator();
@@ -59,15 +62,16 @@ namespace Hypernex.CCK.Editor.Editors
                 }, () => new NexboxScript(),
                 (script, i) => EditorTools.DrawScriptEditorOnCustomEvent(World, ref script, i));
             EditorGUILayout.Separator();
-            EditorTools.DrawSimpleList(ref World.ServerScripts, "Server Scripts", ref srv,
-                () => EditorUtility.SetDirty(World.gameObject),
-                script =>
-                {
-                    if (string.IsNullOrEmpty(script.Name))
-                        return script.Language + " Script";
-                    return script.Name + script.GetExtensionFromLanguage();
-                }, () => new NexboxScript(),
-                (script, i) => EditorTools.DrawScriptEditorOnCustomEvent(World, ref script, i));
+            if(!ContentBuilder.isBuilding)
+                EditorTools.DrawSimpleList(ref World.ServerScripts, "Server Scripts", ref srv,
+                    () => EditorUtility.SetDirty(World.gameObject),
+                    script =>
+                    {
+                        if (string.IsNullOrEmpty(script.Name))
+                            return script.Language + " Script";
+                        return script.Name + script.GetExtensionFromLanguage();
+                    }, () => new NexboxScript(),
+                    (script, i) => EditorTools.DrawScriptEditorOnCustomEvent(World, ref script, i));
             EditorGUILayout.Separator();
             EditorTools.DrawSimpleList(ref World.ScriptAssets, "Local Script Assets", ref sav,
                 () => EditorUtility.SetDirty(World.gameObject), asset =>

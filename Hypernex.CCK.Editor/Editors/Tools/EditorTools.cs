@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Hypernex.CCK.Unity;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -450,7 +452,8 @@ namespace Hypernex.CCK.Editor.Editors.Tools
             if (!s.HasValue)
                 s = SceneManager.GetActiveScene();
             EditorSceneManager.MarkSceneDirty(s.Value);
-            EditorUtility.SetDirty(o);
+            if(o != null)
+                EditorUtility.SetDirty(o);
             EditorSceneManager.SaveScene(s.Value);
             AssetDatabase.SaveAssets();
         }
@@ -511,7 +514,8 @@ namespace Hypernex.CCK.Editor.Editors.Tools
             w.ServerScripts.Clear();
             /*EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());*/
-            MakeSave(w);
+            if(w != null)
+                MakeSave(w);
             string[] assets = { currentScene.path };
             AssetBundleBuild[] builds = new AssetBundleBuild[1];
             builds[0].assetBundleName = id;
@@ -520,8 +524,13 @@ namespace Hypernex.CCK.Editor.Editors.Tools
             BuildPipeline.BuildAssetBundles(abp, builds, BuildAssetBundleOptions.ChunkBasedCompression,
                 EditorUserBuildSettings.activeBuildTarget);
             EditorSceneManager.OpenScene(currentScene.path);
-            w.ServerScripts = oldServerScripts;
-            MakeSave(w);
+            new Thread(() =>
+            {
+                Thread.Sleep(2000);
+                InvokeOnMainThread((Action) (() => w.ServerScripts = oldServerScripts));
+            }).Start();
+            if(w != null)
+                MakeSave(w);
             /*EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());*/
             foreach (string assetBundle in Directory.GetFiles(abp))

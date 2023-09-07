@@ -19,6 +19,7 @@ namespace Hypernex.CCK.Unity
         public float WalkSpeed = 5f;
         public float RunSpeed = 10f;
         public bool AllowRunning = true;
+        public bool AllowScaling = true;
         public bool LockAvatarSwitching;
 
         public bool ReplaceImage;

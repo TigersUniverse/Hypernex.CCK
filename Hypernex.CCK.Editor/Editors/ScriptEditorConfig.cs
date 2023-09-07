@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Hypernex.CCK.Editor.Editors.Tools;
 using UnityEditor;
 using UnityEngine;
@@ -120,6 +125,44 @@ namespace Hypernex.CCK.Editor.Editors
             }, "Hypernex.CCK.ScriptEditor");
         }
 
+        private void StartAppWithWait(string path)
+        {
+            if (!File.Exists(path))
+                return;
+            Type t = typeof(ScriptEditorInstance);
+            int p = (int) t.GetMethod("GetHTTPPort", BindingFlags.Static | BindingFlags.Public)?
+                .Invoke(null, Array.Empty<object>())!;
+            FieldInfo appField = t.GetField("app", BindingFlags.Static | BindingFlags.NonPublic);
+            Process app = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = path,
+                    WorkingDirectory = Path.GetDirectoryName(path),
+                    Arguments = "-port " + p,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            appField?.SetValue(null, app);
+            bool b = app.Start();
+            if (b)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    Thread.Sleep(2000);
+                    WebClient webClient = new WebClient();
+                    int wp = Convert.ToInt32(webClient.DownloadString("http://localhost:" + p + "/getWSPort"));
+                    object[] par = new object[2]
+                    {
+                        wp,
+                        null
+                    };
+                    t.GetMethod("InitSocket", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(null, par);
+                });
+            }
+        }
+
         private void OnGUI()
         {
             EditorConfig c = EditorConfig.GetConfig();
@@ -144,7 +187,10 @@ namespace Hypernex.CCK.Editor.Editors
                 if (GUILayout.Button("Start Script Editor"))
                 {
                     EditorConfig.SaveConfig(EditorConfig.GetEditorConfigLocation());
-                    ScriptEditorInstance.StartApp(EditorConfig.LoadedConfig.ScriptEditorLocation);
+                    if(Application.platform == RuntimePlatform.WindowsEditor)
+                        ScriptEditorInstance.StartApp(EditorConfig.LoadedConfig.ScriptEditorLocation);
+                    else
+                        StartAppWithWait(EditorConfig.LoadedConfig.ScriptEditorLocation);
                     Close();
                 }
             }
