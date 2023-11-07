@@ -510,7 +510,7 @@ namespace Hypernex.CCK.Editor.Editors
             }, AuthManager.CurrentUser, AuthManager.CurrentToken, fs);
         }
 
-        private void OnWorldUpload(CallbackResult<UploadResult> result)
+        private void OnWorldUpload(CallbackResult<UploadResult> result, List<NexboxScript> oldServerScripts)
         {
             isBuilding = false;
             if (result.success)
@@ -524,6 +524,8 @@ namespace Hypernex.CCK.Editor.Editors
                         EditorTools.MakeSave(assetIdentifier);
                     }
                     EditorUtility.DisplayDialog("Hypernex.CCK", "World Uploaded!", "OK");
+                    World.ServerScripts = oldServerScripts;
+                    EditorTools.MakeSave(World);
                 }));
             }
             else
@@ -532,20 +534,38 @@ namespace Hypernex.CCK.Editor.Editors
                 {
                     Logger.CurrentLogger.Warn(result.message);
                     EditorUtility.DisplayDialog("Hypernex.CCK", "Failed to upload world!", "OK");
+                    World.ServerScripts = oldServerScripts;
+                    EditorTools.MakeSave(World);
                 }));
             }
         }
+
+        private WorldMeta CloneWorldMeta(WorldMeta f)
+        {
+            WorldMeta w = new WorldMeta(f.Id, f.OwnerId, f.Publicity, f.Name, f.Description, f.ThumbnailURL)
+            {
+                BuildPlatform = f.BuildPlatform
+            };
+            f.Tags.ForEach(x => w.Tags.Add(x));
+            f.IconURLs.ForEach(x => w.IconURLs.Add(x));
+            f.ServerScripts.ForEach(x => w.ServerScripts.Add(x));
+            return w;
+        }
+
+        private static WorldMeta wmClone;
 
         private void FinishWorldBuild(TempDir tempDir)
         {
             UploadAllScripts(World.ServerScripts, scriptsURLs =>
             {
-                World.Meta.ServerScripts.Clear();
                 foreach (string scriptsUrl in scriptsURLs)
                     World.Meta.ServerScripts.Add(scriptsUrl);
                 AssetIdentifier assetIdentifier = World.GetComponent<AssetIdentifier>();
                 World.Meta.Id = assetIdentifier.GetId();
-                string assetPath = EditorTools.BuildAssetBundle(World, tempDir);
+                wmClone = CloneWorldMeta(World.Meta);
+                World.Meta.ServerScripts.Clear();
+                (string, List<NexboxScript>) r = EditorTools.BuildAssetBundle(World, tempDir);
+                string assetPath = r.Item1;
                 if (!string.IsNullOrEmpty(assetPath))
                 {
                     FileStream fileStream = new FileStream(assetPath, FileMode.Open, FileAccess.Read,
@@ -559,21 +579,21 @@ namespace Hypernex.CCK.Editor.Editors
                             {
                                 EditorTools.InvokeOnMainThread((Action)delegate
                                 {
-                                    OnWorldUpload(result);
+                                    OnWorldUpload(result, r.Item2);
                                     fileStream.Dispose();
                                     tempDir.Dispose();
                                 });
-                            }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, null, World.Meta);
+                            }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, null, wmClone);
                         }).Start();
                     }
                     else
                         AuthManager.Instance.HypernexObject.UploadWorld(result =>
                             {
-                                OnWorldUpload(result);
+                                OnWorldUpload(result, r.Item2);
                                 fileStream.Dispose();
                                 tempDir.Dispose();
                             }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
-                            World.Meta);
+                            wmClone);
                 }
                 else
                     isBuilding = false;

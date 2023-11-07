@@ -498,9 +498,19 @@ namespace Hypernex.CCK.Editor.Editors.Tools
                 "Failed to build! Please see console for more information.", "OK");
             return String.Empty;
         }
-        
-        public static string BuildAssetBundle(World w, TempDir tempDir)
+
+        private static List<NexboxScript> CloneServerScripts(List<NexboxScript> s)
         {
+            List<NexboxScript> nexboxScripts = new List<NexboxScript>();
+            s.ForEach(x => nexboxScripts.Add(new NexboxScript(x.Language, x.Script){Name = x.Name}));
+            return nexboxScripts;
+        }
+        
+        private static List<NexboxScript> oldServerScripts;
+        
+        public static (string, List<NexboxScript>) BuildAssetBundle(World w, TempDir tempDir)
+        {
+            oldServerScripts = CloneServerScripts(w.ServerScripts);
             string uploadTypeString = "world_";
             string uploadFileType = "hnw";
             AssetIdentifier assetIdentifier = w.gameObject.GetComponent<AssetIdentifier>();
@@ -510,7 +520,6 @@ namespace Hypernex.CCK.Editor.Editors.Tools
             tempDir.CreateChildDirectory("assetbundle");
             string abp = Path.Combine(tempDir.GetPath(), "assetbundle");
             Scene currentScene = SceneManager.GetActiveScene();
-            List<NexboxScript> oldServerScripts = new List<NexboxScript>(w.ServerScripts);
             w.ServerScripts.Clear();
             /*EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());*/
@@ -524,11 +533,6 @@ namespace Hypernex.CCK.Editor.Editors.Tools
             BuildPipeline.BuildAssetBundles(abp, builds, BuildAssetBundleOptions.ChunkBasedCompression,
                 EditorUserBuildSettings.activeBuildTarget);
             EditorSceneManager.OpenScene(currentScene.path);
-            new Thread(() =>
-            {
-                Thread.Sleep(2000);
-                InvokeOnMainThread((Action) (() => w.ServerScripts = oldServerScripts));
-            }).Start();
             if(w != null)
                 MakeSave(w);
             /*EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
@@ -538,14 +542,14 @@ namespace Hypernex.CCK.Editor.Editors.Tools
                 string assetBundleName = Path.GetFileName(assetBundle);
                 if (assetBundleName == $"{id}.{uploadFileType}")
                 {
-                    return assetBundle;
+                    return (assetBundle, oldServerScripts);
                 }
             }
             Logger.CurrentLogger.Error("Target AssetBundle did not exist!");
             // Failed to Copy File
             EditorUtility.DisplayDialog("Hypernex.CCK",
                 "Failed to build! Please see console for more information.", "OK");
-            return String.Empty;
+            return (String.Empty, new List<NexboxScript>());
         }
     }
 }
