@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Tomlet;
 using Tomlet.Attributes;
@@ -9,6 +10,9 @@ namespace Hypernex.CCK.Editor
     public class EditorConfig
     {
         public static EditorConfig LoadedConfig { get; set; }
+        
+        public static readonly List<Type> AdditionalAllowedAvatarTypes = new List<Type>();
+        public static readonly List<Type> AdditionalAllowedWorldTypes = new List<Type>();
         
         [TomlProperty("ScriptEditorLocation")]
         [TomlPrecedingComment("Location of the Script Editor Application")]

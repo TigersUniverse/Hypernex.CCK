@@ -63,6 +63,9 @@
         <Reference Include="UnityEngine.PhysicsModule">
           <HintPath>..\..\..\UnityEditors\2021.3.16f1\Editor\Data\Managed\UnityEngine\UnityEngine.PhysicsModule.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.UIModule">
+          <HintPath>..\..\..\UnityEditors\2023.1.10f1\Editor\Data\Managed\UnityEngine\UnityEngine.UIModule.dll</HintPath>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
         <Compile Include="AnimatorPlayable.cs" />
@@ -73,10 +76,12 @@
         <Compile Include="EyeBlendshapeAction.cs" />
         <Compile Include="FaceTrackingDescriptor.cs" />
         <Compile Include="GrabbableDescriptor.cs" />
+        <Compile Include="Internals\SecurityList.cs" />
         <Compile Include="Internals\SerializedDictionaries.cs" />
         <Compile Include="Internals\SerializedDictionary.cs" />
         <Compile Include="Internals\BlendshapeDescriptor.cs" />
         <Compile Include="IVideoPlayer.cs" />
+        <Compile Include="VideoPlayerBehaviour.cs" />
         <Compile Include="LocalScript.cs" />
         <Compile Include="MaterialDescriptor.cs" />
         <Compile Include="NetworkSyncDescriptor.cs" />
@@ -87,7 +92,7 @@
         <Compile Include="UnityLogger.cs" />
         <Compile Include="VideoPlayerDescriptor.cs" />
         <Compile Include="Viseme.cs" />
-        <Compile Include="WhitelistedComponents.cs" />
+        <Compile Include="Security.cs" />
         <Compile Include="World.cs" />
     </ItemGroup>
     <ItemGroup>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Hypernex.CCK.Unity
@@ -29,5 +30,80 @@ namespace Hypernex.CCK.Unity
         public string ShaderEmissionProperty = "_EmissionMap";
         
         [HideInInspector] public IVideoPlayer CurrentVideoPlayer;
+
+        public bool TryGetBehaviour(out VideoPlayerBehaviour videoPlayerBehaviour)
+        {
+            try
+            {
+                if (CurrentVideoPlayer == null)
+                {
+                    videoPlayerBehaviour = null;
+                    return false;
+                }
+                videoPlayerBehaviour = (VideoPlayerBehaviour) CurrentVideoPlayer;
+                return true;
+            }
+            catch (Exception)
+            {
+                videoPlayerBehaviour = null;
+                return false;
+            }
+        }
+        
+        public void Awake()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.Awake();
+        }
+
+        public void Start()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.Start();
+        }
+        
+        public void OnEnable()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.OnEnable();
+        }
+        
+        public void OnDisable()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.OnDisable();
+        }
+        
+        public void FixedUpdate()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.FixedUpdate();
+        }
+        
+        public void Update()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.Update();
+        }
+        
+        public void LateUpdate()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.LateUpdate();
+        }
+        
+        public void OnAudioFilterRead(float[] data, int channels)
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.OnAudioFilterRead(data, channels);
+        }
+        
+        public void OnGUI()
+        {
+            if(!TryGetBehaviour(out VideoPlayerBehaviour b)) return;
+            b.OnGUI();
+        }
+
+        private void OnDestroy() => CurrentVideoPlayer?.Dispose();
     }
 }

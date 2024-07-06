@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Hypernex.CCK.Editor.Editors.Tools;
 using Hypernex.CCK.Unity;
@@ -11,8 +12,10 @@ using HypernexSharp.APIObjects;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 using Avatar = Hypernex.CCK.Unity.Avatar;
 using LoginResult = HypernexSharp.APIObjects.LoginResult;
+using Security = Hypernex.CCK.Unity.Security;
 
 // ReSharper disable ObjectCreationAsStatement
 
@@ -188,6 +191,11 @@ namespace Hypernex.CCK.Editor.Editors
         private Avatar SelectedAvatar;
         private AssetIdentifier SelectedAssetIdentifier;
         private List<Avatar> AvatarsInScene;
+
+        private AllowedAvatarComponent AllowedAvatarComponent =
+            new AllowedAvatarComponent(true, true, true, true, true, true);
+        private Component[] DeniedComponents = Array.Empty<Component>();
+        private string LastDeniedString = String.Empty;
 
         private static bool ot = true;
 
@@ -381,8 +389,28 @@ namespace Hypernex.CCK.Editor.Editors
                 EditorGUILayout.BeginHorizontal();
                 if (!isBuilding && AllowBuild)
                 {
+                    if (!string.IsNullOrEmpty(LastDeniedString))
+                    {
+                        EditorGUILayout.HelpBox("Blacklisted types found! " + LastDeniedString, MessageType.Error);
+                        if (GUILayout.Button("Retry"))
+                        {
+                            DeniedComponents = Security.GetOffendingComponents(SelectedAvatar, AllowedAvatarComponent,
+                                EditorConfig.AdditionalAllowedWorldTypes.ToArray());
+                            LastDeniedString = DeniedComponents.Length > 0
+                                ? GetComponentsListString()
+                                : String.Empty;
+                        }
+                        return;
+                    }
                     if (GUILayout.Button("Build Avatar!"))
                     {
+                        DeniedComponents = Security.GetOffendingComponents(SelectedAvatar, AllowedAvatarComponent,
+                            EditorConfig.AdditionalAllowedWorldTypes.ToArray());
+                        if (DeniedComponents.Length > 0)
+                        {
+                            LastDeniedString = GetComponentsListString();
+                            return;
+                        }
                         isBuilding = true;
                         //EditorUtility.SetDirty(SelectedAvatar.gameObject);
                         //AssetDatabase.SaveAssets();
@@ -730,8 +758,28 @@ namespace Hypernex.CCK.Editor.Editors
                 BuildPlatform buildPlatform = GetBuildPlatformFromBuildTarget();
                 if (!isBuilding && AllowBuild)
                 {
+                    if (!string.IsNullOrEmpty(LastDeniedString))
+                    {
+                        EditorGUILayout.HelpBox("Blacklisted types found! " + LastDeniedString, MessageType.Error);
+                        if (GUILayout.Button("Retry"))
+                        {
+                            DeniedComponents = Security.GetOffendingComponents(SceneManager.GetActiveScene(),
+                                EditorConfig.AdditionalAllowedWorldTypes.ToArray());
+                            LastDeniedString = DeniedComponents.Length > 0
+                                ? GetComponentsListString()
+                                : String.Empty;
+                        }
+                        return;
+                    }
                     if (GUILayout.Button("Build world!"))
                     {
+                        DeniedComponents = Security.GetOffendingComponents(SceneManager.GetActiveScene(),
+                            EditorConfig.AdditionalAllowedWorldTypes.ToArray());
+                        if (DeniedComponents.Length > 0)
+                        {
+                            LastDeniedString = GetComponentsListString();
+                            return;
+                        }
                         isBuilding = true;
                         EditorTools.MakeSave();
                         if (string.IsNullOrEmpty(World.Meta.Name))
@@ -801,6 +849,19 @@ namespace Hypernex.CCK.Editor.Editors
                     GUILayout.Label("Please wait while your World is being Built...",
                         EditorStyles.centeredGreyMiniLabel);
             }
+        }
+
+        private string GetComponentsListString()
+        {
+            string componentsString = "";
+            for (int i = 0; i < DeniedComponents.Length; i++)
+            {
+                Component deniedComponent = DeniedComponents[i];
+                componentsString += deniedComponent.GetType().FullName + " on " + deniedComponent.gameObject.name;
+                if(i >= DeniedComponents.Length - 1) break;
+                componentsString += ", ";
+            }
+            return componentsString;
         }
 
         private bool VerifyProject()
@@ -900,6 +961,7 @@ namespace Hypernex.CCK.Editor.Editors
                 {
                     AllowBuild = VerifyProject();
                     RenderAvatarList();
+                    LastDeniedString = String.Empty;
                     if(GUILayout.Button("Refresh User"))
                         AuthManager.Instance.Refresh();
                     if (GUILayout.Button($"Sign Out ({AuthManager.CurrentUser.Username})"))

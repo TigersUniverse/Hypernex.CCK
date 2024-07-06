@@ -73,9 +73,6 @@ namespace Hypernex.CCK.Editor
                 ContentBuilder.isLoggingIn = true;
                 new AuthManager(c.TargetDomain, c.SavedUserId, c.SavedToken, ContentBuilder.HandleLogin);
             }
-            Type tmp_text = WhitelistedComponents.GetTMPType(WhitelistedComponents.TMPTypes.TMP_Text);
-            if(tmp_text != null)
-                WhitelistedComponents.AllowedAvatarTypes.Add(tmp_text);
             foreach (KeyValuePair<BuildTarget,GraphicsDeviceType[]> graphicsAPI in GraphicsAPIs)
             {
                 bool compareA = Compare(PlayerSettings.GetGraphicsAPIs(graphicsAPI.Key), graphicsAPI.Value);

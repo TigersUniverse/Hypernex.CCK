@@ -5,18 +5,6 @@ namespace Hypernex.CCK.Unity
     public interface IVideoPlayer : IDisposable
     {
         /// <summary>
-        /// Defines if the Video Player can be used on the current Platform at all
-        /// </summary>
-        /// <returns>Usable on platform</returns>
-        bool CanBeUsed();
-        /// <summary>
-        /// Defines if the Video Player can be used for the specified source
-        /// </summary>
-        /// <param name="source">The source URL/Path</param>
-        /// <returns>Media usable on Video Player</returns>
-        bool CanBeUsed(Uri source);
-        
-        /// <summary>
         /// If the Media is playing
         /// </summary>
         bool IsPlaying { get; }
