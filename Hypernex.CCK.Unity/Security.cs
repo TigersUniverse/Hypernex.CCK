@@ -73,7 +73,7 @@ namespace Hypernex.CCK.Unity
                 }
                 try
                 {
-                    Object.Destroy(x.gameObject);
+                    Object.Destroy(x);
                 }
                 catch (Exception)
                 {
