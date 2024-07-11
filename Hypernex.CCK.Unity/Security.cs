@@ -58,6 +58,16 @@ namespace Hypernex.CCK.Unity
             x =>
             {
                 if (x == null || x.gameObject == null) return;
+                // Removes the whole GameObject if told to
+                bool forceRemoveObject = ForceDeleteGameObject.Contains(x.GetType());
+                if (forceRemoveObject)
+                {
+                    if (destroyImmediate)
+                        Object.DestroyImmediate(x.gameObject);
+                    else
+                        Object.Destroy(x.gameObject);
+                    return;
+                }
                 // Tries to remove the components, and if it can't, it removes the whole GameObject
                 if (destroyImmediate)
                 {
@@ -190,6 +200,10 @@ namespace Hypernex.CCK.Unity
             typeof(TrailRenderer)
         });
 
+        private static List<Type> ForceDeleteGameObject = new List<Type>();
+
+        public static void RegisterForceDeleteObject<T>() => ForceDeleteGameObject.Add(typeof(T));
+
         private static readonly Dictionary<Type, Action<Component, bool>> ComponentRestrictions =
             new Dictionary<Type, Action<Component, bool>>();
 
@@ -212,11 +226,12 @@ namespace Hypernex.CCK.Unity
             List<Component> appliedComponents = new List<Component>();
             foreach (GameObject gameObject in gameObjects)
             {
+                if(gameObject == null) continue;
                 List<Component> currentComponents = new List<Component>();
                 gameObject.GetComponents(currentComponents);
                 foreach (Component component in currentComponents)
                 {
-                    if(appliedComponents.Contains(component)) continue;
+                    if(component == null || appliedComponents.Contains(component)) continue;
                     Type componentType = component.GetType();
                     if (!ComponentRestrictions.TryGetValue(componentType, out var typeAction)) continue;
                     typeAction.Invoke(component, isWorld);
