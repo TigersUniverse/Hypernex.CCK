@@ -857,7 +857,15 @@ namespace Hypernex.CCK.Editor.Editors
             for (int i = 0; i < DeniedComponents.Length; i++)
             {
                 Component deniedComponent = DeniedComponents[i];
-                componentsString += deniedComponent.GetType().FullName + " on " + deniedComponent.gameObject.name;
+                if (deniedComponent == null)
+                {
+                    if (i >= DeniedComponents.Length - 1)
+                        componentsString = componentsString.Remove(componentsString.Length - 2, 2);
+                    continue;
+                }
+                string n = deniedComponent.GetType().FullName ?? deniedComponent.name;
+                GameObject gameObject = deniedComponent.gameObject;
+                componentsString += gameObject == null ? n : n + " on " + deniedComponent.gameObject.name;
                 if(i >= DeniedComponents.Length - 1) break;
                 componentsString += ", ";
             }
