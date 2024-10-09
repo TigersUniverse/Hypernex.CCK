@@ -12,8 +12,11 @@ namespace Hypernex.CCK.Unity
         private static readonly List<HypernexPlugin> _loadedPlugins = new List<HypernexPlugin>();
         public static List<HypernexPlugin> LoadedPlugins => new List<HypernexPlugin>(_loadedPlugins);
 
+        private static readonly string[] Libs = {"Hypernex.CCK.Unity.Libs.Lib.Harmony.0Harmony.dll"};
+
         public static int LoadAllPlugins(string path)
         {
+            LoadEmbeddedLibs();
             int pluginsLoaded = 0;
             if (!Directory.Exists(path))
             {
@@ -32,6 +35,7 @@ namespace Hypernex.CCK.Unity
                         HypernexPlugin hypernexPlugin = (HypernexPlugin) Activator.CreateInstance(pluginType);
                         if (hypernexPlugin == null)
                             throw new Exception("Failed to create instance from HypernexPlugin!");
+                        typeof(HypernexPlugin).GetProperty("Logger")?.SetValue(hypernexPlugin, new UnityPluginLogger(hypernexPlugin.PluginName));
                         Logger.CurrentLogger.Log($"Loaded Plugin {hypernexPlugin.PluginName} by {hypernexPlugin.PluginCreator} ({hypernexPlugin.PluginVersion})");
                         _loadedPlugins.Add(hypernexPlugin);
                         pluginsLoaded++;
@@ -44,6 +48,28 @@ namespace Hypernex.CCK.Unity
                 }
             }
             return pluginsLoaded;
+        }
+
+        private static void LoadEmbeddedLibs()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            foreach (string lib in Libs)
+            {
+                using (Stream stream = assembly.GetManifestResourceStream(lib))
+                {
+                    if (stream == null)
+                    {
+                        Logger.CurrentLogger.Error("Cannot find dll from reference " + lib);
+                        continue;
+                    }
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        stream.CopyTo(memoryStream);
+                        byte[] data = memoryStream.ToArray();
+                        AppDomain.CurrentDomain.Load(data);
+                    }
+                }
+            }
         }
 
         private void Start()

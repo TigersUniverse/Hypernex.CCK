@@ -97,6 +97,10 @@
     </ItemGroup>
     <ItemGroup>
       <Content Include="Libs\HypernexSharp.dll" />
+      <Content Include="Libs\Lib.Harmony\LICENSE" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="Libs\Lib.Harmony\0Harmony.dll" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

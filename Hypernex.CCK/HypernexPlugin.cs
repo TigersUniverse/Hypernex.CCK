@@ -6,6 +6,8 @@
         public abstract string PluginCreator { get; }
         public abstract string PluginVersion { get; }
         
+        public Logger Logger { get; private set; }
+        
         public virtual void OnPluginLoaded(){}
         public virtual void Start(){}
         public virtual void FixedUpdate(){}
