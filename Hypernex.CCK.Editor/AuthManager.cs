@@ -62,10 +62,8 @@ namespace Hypernex.CCK.Editor
         {
             HypernexSettings = new HypernexSettings(username, email, password, inviteCode)
             {
-                TargetDomain = targetDomain
-#if DEBUG
-                ,IsHTTP = Editors.ContentBuilder.useHTTP
-#endif
+                TargetDomain = targetDomain,
+                IsHTTP = EditorConfig.GetConfig().UseHTTP
             };
             HypernexObject = new HypernexObject(HypernexSettings);
             HypernexObject.CreateUser(result =>
@@ -89,10 +87,8 @@ namespace Hypernex.CCK.Editor
         {
             HypernexSettings = new HypernexSettings(username, password, twofa)
             {
-                TargetDomain = targetDomain
-#if DEBUG
-                ,IsHTTP = Editors.ContentBuilder.useHTTP
-#endif
+                TargetDomain = targetDomain,
+                IsHTTP = EditorConfig.GetConfig().UseHTTP
             };
             HypernexObject = new HypernexObject(HypernexSettings);
             HypernexObject.Login(result =>
@@ -129,10 +125,8 @@ namespace Hypernex.CCK.Editor
         {
             HypernexSettings = new HypernexSettings(userId, tokenContent)
             {
-                TargetDomain = targetDomain
-#if DEBUG
-                ,IsHTTP = Editors.ContentBuilder.useHTTP || (EditorConfig.LoadedConfig?.UseHTTP ?? false)
-#endif
+                TargetDomain = targetDomain,
+                IsHTTP = EditorConfig.GetConfig().UseHTTP
             };
             HypernexObject = new HypernexObject(HypernexSettings);
             HypernexObject.Login(result =>
@@ -181,9 +175,6 @@ namespace Hypernex.CCK.Editor
             c.TargetDomain = HypernexSettings.TargetDomain;
             c.SavedUserId = CurrentUser.Id;
             c.SavedToken = CurrentToken.content;
-#if DEBUG
-            c.UseHTTP = Editors.ContentBuilder.useHTTP;
-#endif
             EditorConfig.SaveConfig(EditorConfig.GetEditorConfigLocation());
         }
     }

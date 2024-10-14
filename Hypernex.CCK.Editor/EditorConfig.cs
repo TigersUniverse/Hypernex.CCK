@@ -22,6 +22,10 @@ namespace Hypernex.CCK.Editor
         [TomlPrecedingComment("Used to Debug local servers. Please do not edit manually!")]
         public bool UseHTTP { get; set; }
         
+        [TomlProperty("OverrideSecurity")]
+        [TomlPrecedingComment("Bypass any Component Security preventing you from building")]
+        public bool OverrideSecurity { get; set; }
+        
         [TomlProperty("TargetDomain")]
         [TomlPrecedingComment("Domain to Authenticate to")]
         public string TargetDomain { get; set; } = String.Empty;

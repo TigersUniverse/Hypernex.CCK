@@ -107,7 +107,7 @@
         <Compile Include="Editors\LocalScriptEditor.cs" />
         <Compile Include="Editors\MaterialDescriptorEditor.cs" />
         <Compile Include="Editors\RespawnableDescriptorEditor.cs" />
-        <Compile Include="Editors\ScriptEditorConfig.cs" />
+        <Compile Include="Editors\CCKEditorConfig.cs" />
         <Compile Include="Editors\SimpleScriptEditor.cs" />
         <Compile Include="Editors\Tools\ButtonThemes.cs" />
         <Compile Include="Editors\Tools\EditorTools.cs" />

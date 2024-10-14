@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using Hypernex.CCK.Editor.Editors.Tools;
 using Hypernex.CCK.Unity;
@@ -42,17 +41,7 @@ namespace Hypernex.CCK.Editor.Editors
                 new AuthManager(c.TargetDomain, c.SavedUserId, c.SavedToken, HandleLogin);
             }
         }
-
-        internal static 
-#if !DEBUG
-    readonly 
-#endif 
-            bool useHTTP
-#if !DEBUG
-        = false;
-#else
-            ;
-#endif
+        
         private static WarnStatus warnStatus;
         private static BanStatus banStatus;
         
@@ -67,9 +56,6 @@ namespace Hypernex.CCK.Editor.Editors
                 return;
             }
             EditorGUILayout.HelpBox("Enter the domain to connect, authenticate, and upload to.", MessageType.Info);
-#if DEBUG
-            useHTTP = EditorGUILayout.Toggle("Use HTTP", useHTTP);
-#endif
             targetDomain = GUILayout.TextField(targetDomain);
             if (GUILayout.Button("Next"))
             {
@@ -404,8 +390,11 @@ namespace Hypernex.CCK.Editor.Editors
                     }
                     if (GUILayout.Button("Build Avatar!"))
                     {
-                        DeniedComponents = Security.GetOffendingComponents(SelectedAvatar, AllowedAvatarComponent,
-                            EditorConfig.AdditionalAllowedWorldTypes.ToArray());
+                        if (EditorConfig.GetConfig().OverrideSecurity)
+                            DeniedComponents = Array.Empty<Component>();
+                        else
+                            DeniedComponents = Security.GetOffendingComponents(SelectedAvatar, AllowedAvatarComponent,
+                                EditorConfig.AdditionalAllowedWorldTypes.ToArray());
                         if (DeniedComponents.Length > 0)
                         {
                             LastDeniedString = GetComponentsListString();
@@ -421,6 +410,7 @@ namespace Hypernex.CCK.Editor.Editors
                             return;
                         }
                         SelectedAvatar.Meta.BuildPlatform = buildPlatform;
+                        SelectedAvatar.Meta.Id = SelectedAssetIdentifier.GetId();
                         TempDir tempDir = new TempDir(true);
                         TempDir thumbnailTempDir = new TempDir();
                         if (SelectedAvatar.ReplaceImage && SelectedAvatar.Image != null)
@@ -773,8 +763,11 @@ namespace Hypernex.CCK.Editor.Editors
                     }
                     if (GUILayout.Button("Build world!"))
                     {
-                        DeniedComponents = Security.GetOffendingComponents(SceneManager.GetActiveScene(),
-                            EditorConfig.AdditionalAllowedWorldTypes.ToArray());
+                        if (EditorConfig.GetConfig().OverrideSecurity)
+                            DeniedComponents = Array.Empty<Component>();
+                        else
+                            DeniedComponents = Security.GetOffendingComponents(SceneManager.GetActiveScene(),
+                                EditorConfig.AdditionalAllowedWorldTypes.ToArray());
                         if (DeniedComponents.Length > 0)
                         {
                             LastDeniedString = GetComponentsListString();
@@ -788,6 +781,7 @@ namespace Hypernex.CCK.Editor.Editors
                             return;
                         }
                         World.Meta.BuildPlatform = buildPlatform;
+                        World.Meta.Id = SelectedAssetIdentifier.GetId();
                         TempDir tempDir = new TempDir();
                         if (World.ReplaceImage && World.Thumbnail != null)
                         {
@@ -945,9 +939,9 @@ namespace Hypernex.CCK.Editor.Editors
                             AuthManager.Instance.Refresh();
                         if (GUILayout.Button($"Sign Out ({AuthManager.CurrentUser.Username})"))
                         {
-                            EditorConfig.LoadedConfig.TargetDomain = String.Empty;
-                            EditorConfig.LoadedConfig.SavedUserId = String.Empty;
-                            EditorConfig.LoadedConfig.SavedToken = String.Empty;
+                            EditorConfig.GetConfig().TargetDomain = String.Empty;
+                            EditorConfig.GetConfig().SavedUserId = String.Empty;
+                            EditorConfig.GetConfig().SavedToken = String.Empty;
                             EditorConfig.SaveConfig(EditorConfig.GetEditorConfigLocation());
                             AuthManager.Instance.HypernexObject.Logout(_ => { }, AuthManager.CurrentUser,
                                 AuthManager.CurrentToken);
@@ -974,9 +968,9 @@ namespace Hypernex.CCK.Editor.Editors
                         AuthManager.Instance.Refresh();
                     if (GUILayout.Button($"Sign Out ({AuthManager.CurrentUser.Username})"))
                     {
-                        EditorConfig.LoadedConfig.TargetDomain = String.Empty;
-                        EditorConfig.LoadedConfig.SavedUserId = String.Empty;
-                        EditorConfig.LoadedConfig.SavedToken = String.Empty;
+                        EditorConfig.GetConfig().TargetDomain = String.Empty;
+                        EditorConfig.GetConfig().SavedUserId = String.Empty;
+                        EditorConfig.GetConfig().SavedToken = String.Empty;
                         EditorConfig.SaveConfig(EditorConfig.GetEditorConfigLocation());
                         AuthManager.Instance.HypernexObject.Logout(_ => { }, AuthManager.CurrentUser,
                             AuthManager.CurrentToken);

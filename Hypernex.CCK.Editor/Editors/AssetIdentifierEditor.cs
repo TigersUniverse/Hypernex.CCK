@@ -1,5 +1,4 @@
 ﻿using System;
-using Hypernex.CCK.Editor.Editors.Tools;
 using Hypernex.CCK.Unity;
 using UnityEditor;
 using UnityEngine;
@@ -45,8 +44,7 @@ namespace Hypernex.CCK.Editor.Editors
                 lastId = String.Empty;
                 newId = String.Empty;
                 AssetIdentifier.SetId(String.Empty);
-                EditorTools.MakeSave(AssetIdentifier);
-                //EditorUtility.SetDirty(AssetIdentifier.gameObject);
+                EditorUtility.SetDirty(AssetIdentifier.gameObject);
             }
             if (GUILayout.Button("Apply Asset Identifier"))
             {
@@ -59,8 +57,7 @@ namespace Hypernex.CCK.Editor.Editors
                 {
                     lastId = newId;
                     AssetIdentifier.SetId(newId);
-                    EditorTools.MakeSave(AssetIdentifier);
-                    //EditorUtility.SetDirty(AssetIdentifier.gameObject);
+                    EditorUtility.SetDirty(AssetIdentifier.gameObject);
                 }
                 else
                 {
