@@ -173,6 +173,9 @@ namespace Hypernex.CCK.Editor.Editors
         }
 
         internal static bool isBuilding;
+        private static bool isUploading;
+        private static int AvatarUploadProgress;
+        private static int WorldUploadProgress;
         private World World;
         private Avatar SelectedAvatar;
         private AssetIdentifier SelectedAssetIdentifier;
@@ -252,6 +255,7 @@ namespace Hypernex.CCK.Editor.Editors
         private void OnAvatarUpload(CallbackResult<UploadResult> result)
         {
             isBuilding = false;
+            isUploading = false;
             if (result.success)
             {
                 if(!string.IsNullOrEmpty(result.result.AvatarId))
@@ -281,6 +285,7 @@ namespace Hypernex.CCK.Editor.Editors
             string assetPath = EditorTools.BuildAssetBundle(SelectedAvatar, tempDir);
             if (!string.IsNullOrEmpty(assetPath))
             {
+                isUploading = true;
                 FileStream fileStream = new FileStream(assetPath, FileMode.Open, FileAccess.Read,
                     FileShare.Delete | FileShare.Read);
                 if (fileStream.Length > 1048576 * 90)
@@ -289,14 +294,16 @@ namespace Hypernex.CCK.Editor.Editors
                     new Thread(() =>
                     {
                         AuthManager.Instance.HypernexObject.UploadPart(result =>
-                        {
-                            EditorTools.InvokeOnMainThread((Action) delegate
                             {
-                                OnAvatarUpload(result);
-                                fileStream.Dispose();
-                                tempDir.Dispose();
-                            });
-                        }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, SelectedAvatar.Meta);
+                                EditorTools.InvokeOnMainThread((Action) delegate
+                                {
+                                    OnAvatarUpload(result);
+                                    fileStream.Dispose();
+                                    tempDir.Dispose();
+                                });
+                            }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, SelectedAvatar.Meta,
+                            null,
+                            i => AvatarUploadProgress = i);
                     }).Start();
                 }
                 else
@@ -306,7 +313,7 @@ namespace Hypernex.CCK.Editor.Editors
                             fileStream.Dispose();
                             tempDir.Dispose();
                         }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
-                        SelectedAvatar.Meta);
+                        SelectedAvatar.Meta, i => AvatarUploadProgress = i);
             }
             else
                 isBuilding = false;
@@ -401,6 +408,8 @@ namespace Hypernex.CCK.Editor.Editors
                             return;
                         }
                         isBuilding = true;
+                        isUploading = false;
+                        AvatarUploadProgress = 0;
                         //EditorUtility.SetDirty(SelectedAvatar.gameObject);
                         //AssetDatabase.SaveAssets();
                         EditorTools.MakeSave(SelectedAvatar.gameObject);
@@ -477,8 +486,11 @@ namespace Hypernex.CCK.Editor.Editors
                 else if (isBuilding)
                 {
                     EditorGUILayout.EndHorizontal();
-                    GUILayout.Label("Please wait while your Avatar is being Built...",
-                        EditorStyles.centeredGreyMiniLabel);
+                    string text = isUploading
+                        ? $"Upload Progress: {AvatarUploadProgress}%"
+                        : "Please wait while your Avatar is being Built...";
+                    if (AvatarUploadProgress >= 100) text = "Processing build...";
+                    GUILayout.Label(text, EditorStyles.centeredGreyMiniLabel);
                 }
                 else
                     EditorGUILayout.EndHorizontal();
@@ -531,6 +543,7 @@ namespace Hypernex.CCK.Editor.Editors
         private void OnWorldUpload(CallbackResult<UploadResult> result, List<NexboxScript> oldServerScripts)
         {
             isBuilding = false;
+            isUploading = false;
             if (result.success)
             {
                 EditorTools.InvokeOnMainThread((Action)(() =>
@@ -586,6 +599,7 @@ namespace Hypernex.CCK.Editor.Editors
                 string assetPath = r.Item1;
                 if (!string.IsNullOrEmpty(assetPath))
                 {
+                    isUploading = true;
                     FileStream fileStream = new FileStream(assetPath, FileMode.Open, FileAccess.Read,
                         FileShare.Delete | FileShare.Read);
                     if(fileStream.Length > 1048576 * 90)
@@ -594,14 +608,15 @@ namespace Hypernex.CCK.Editor.Editors
                         new Thread(() =>
                         {
                             AuthManager.Instance.HypernexObject.UploadPart(result =>
-                            {
-                                EditorTools.InvokeOnMainThread((Action)delegate
                                 {
-                                    OnWorldUpload(result, r.Item2);
-                                    fileStream.Dispose();
-                                    tempDir.Dispose();
-                                });
-                            }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, null, wmClone);
+                                    EditorTools.InvokeOnMainThread((Action) delegate
+                                    {
+                                        OnWorldUpload(result, r.Item2);
+                                        fileStream.Dispose();
+                                        tempDir.Dispose();
+                                    });
+                                }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream, td, null, wmClone,
+                                i => WorldUploadProgress = i);
                         }).Start();
                     }
                     else
@@ -611,7 +626,7 @@ namespace Hypernex.CCK.Editor.Editors
                                 fileStream.Dispose();
                                 tempDir.Dispose();
                             }, AuthManager.CurrentUser, AuthManager.CurrentToken, fileStream,
-                            wmClone);
+                            wmClone, i => WorldUploadProgress = i);
                 }
                 else
                     isBuilding = false;
@@ -774,6 +789,8 @@ namespace Hypernex.CCK.Editor.Editors
                             return;
                         }
                         isBuilding = true;
+                        isUploading = false;
+                        WorldUploadProgress = 0;
                         EditorTools.MakeSave();
                         if (string.IsNullOrEmpty(World.Meta.Name))
                         {
@@ -840,8 +857,13 @@ namespace Hypernex.CCK.Editor.Editors
                     GUILayout.Label("You cannot build! Please fix any problems relating to the project or world!",
                         EditorStyles.centeredGreyMiniLabel);
                 else if (isBuilding)
-                    GUILayout.Label("Please wait while your World is being Built...",
-                        EditorStyles.centeredGreyMiniLabel);
+                {
+                    string text = isUploading
+                        ? $"Upload Progress: {WorldUploadProgress}%"
+                        : "Please wait while your World is being Built...";
+                    if (WorldUploadProgress >= 100) text = "Processing build...";
+                    GUILayout.Label(text, EditorStyles.centeredGreyMiniLabel);
+                }
             }
         }
 
