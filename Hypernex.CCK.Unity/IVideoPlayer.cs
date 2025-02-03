@@ -49,5 +49,11 @@ namespace Hypernex.CCK.Unity
         /// Stops the video
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// The schematic for a local file. Most video players accept "file:///", but some are special.
+        /// </summary>
+        /// <returns>The local file schematic</returns>
+        string GetFileHeader();
     }
 }
