@@ -60,7 +60,7 @@ namespace Hypernex.Game
                     WorldObjectUpdate worldObjectUpdate =
                         (WorldObjectUpdate) Convert.ChangeType(msgMeta.Data, typeof(WorldObjectUpdate));
                     Transform targetObject = AnimationUtility.GetObjectFromRoot(worldObjectUpdate.Object.ObjectLocation,
-                        gameInstance.currentScene);
+                        gameInstance.loadedScene);
                     if (targetObject != null)
                     {
                         // We only want to sync objects that have a reason to be synced

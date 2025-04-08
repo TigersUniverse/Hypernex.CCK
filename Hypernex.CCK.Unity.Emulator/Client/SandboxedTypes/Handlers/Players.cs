@@ -23,6 +23,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.Handlers
 
         public string[] ActiveUserIds => GameInstance.GetConnectedUsers(gameInstance).Select(x => x.Id).ToArray();
 
+        private bool wasInInstance = true;
         private Dictionary<string, Player> playerCache = new();
 
         private void UpdatePlayerCache()

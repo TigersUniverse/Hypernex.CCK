@@ -4,7 +4,6 @@ using System.Linq;
 using Hypernex.CCK.Unity.Internals;
 using Hypernex.Game;
 using Hypernex.Game.Avatar;
-using Hypernex.Networking.Messages.Data;
 using Hypernex.Player;
 using Hypernex.Tools;
 using UnityEngine;
@@ -130,7 +129,13 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             if (!isLocalAvatar || gameInstance == null || (gameInstance.World != null && !gameInstance.World.AllowScaling &&
                                    sandboxRestriction != SandboxRestriction.Local))
                 return;
-            localPlayer.Scale(scale);
+            if (LocalPlayer.Instance == null)
+                return;
+            if(LocalPlayer.Instance.Dashboard.IsVisible)
+                LocalPlayer.Instance.Dashboard.ToggleDashboard(LocalPlayer.Instance);
+            LocalPlayer.Instance.Scale(scale);
+            if(!LocalPlayer.Instance.Dashboard.IsVisible)
+                LocalPlayer.Instance.Dashboard.ToggleDashboard(LocalPlayer.Instance);
         }
     }
 }

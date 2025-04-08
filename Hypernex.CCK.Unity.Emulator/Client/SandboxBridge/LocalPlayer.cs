@@ -303,7 +303,7 @@ namespace Hypernex.Game
             // TODO: Reduce GC
             bool vr = IsVR;
             CursorTools.ToggleMouseLock(vr || LockCamera);
-            CursorTools.ToggleMouseVisibility(!vr);
+            CursorTools.ToggleMouseVisibility(!vr || LockCamera);
             groundedPlayer = CharacterController.isGrounded;
             if (!LockMovement)
             {

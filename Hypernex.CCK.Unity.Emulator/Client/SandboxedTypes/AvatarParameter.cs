@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Hypernex.CCK.Unity.Internals;
-using Hypernex.Game;
 using Hypernex.Game.Avatar;
 using UnityEngine;
 
@@ -44,15 +43,8 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             }
         }
 
-        [Obsolete]
-        public bool IsVisible
-        {
-            get
-            {
-                if (avatarCreator.Avatar.Parameters == null) return false;
-                return avatarCreator.Avatar.Parameters.Parameters.Count(x => x.ParameterName == Name) > 0;
-            }
-        }
+        public bool IsVisible => avatarCreator.Avatar.Parameters.Parameters.Count(x =>
+            x.ParameterName == parameter.name && x.ParameterType == parameter.type) > 0;
 
         public object GetValue() => avatarCreator.GetParameter(parameter.name, animatorPlayable.CustomPlayableAnimator);
 

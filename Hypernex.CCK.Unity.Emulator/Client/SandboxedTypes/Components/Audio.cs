@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
-using Hypernex.Tools;
 using Hypernex.Game;
+using Hypernex.Tools;
 using Nexbox;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -29,6 +29,16 @@ namespace Hypernex.Sandboxing.SandboxedTypes.Components
             read = i.IsReadOnly;
             audioSource = GetAudioSource(i);
             if (audioSource == null) throw new Exception("No AudioSource found on Item at " + i.Path);
+        }
+        
+        public bool Enabled
+        {
+            get => audioSource == null ? false : audioSource.enabled;
+            set
+            {
+                if(read || audioSource == null) return;
+                audioSource.enabled = value;
+            }
         }
 
         public bool IsPlaying() => audioSource.isPlaying;

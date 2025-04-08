@@ -84,7 +84,7 @@ namespace Hypernex.Game
         public InstancePublicity Publicity;
         public bool lockAvatarSwitching;
 
-        internal Scene currentScene;
+        internal Scene loadedScene;
         internal bool authed;
         internal List<Sandbox> sandboxes = new ();
         public readonly string instanceCreatorId;
@@ -99,13 +99,13 @@ namespace Hypernex.Game
         public GameInstance(World world)
         {
             FocusedInstance = this;
-            currentScene = SceneManager.GetActiveScene();
+            loadedScene = SceneManager.GetActiveScene();
             World = world;
             if(World == null) return;
             host = APIPlayer.APIUser;
-            LocalPlayer.Instance.Respawn(currentScene);
+            LocalPlayer.Instance.Respawn(loadedScene);
             volumes = Object.FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Where(x => x.gameObject.scene == currentScene).ToArray();
+                .Where(x => x.gameObject.scene == loadedScene).ToArray();
             LoadScene();
         }
         
@@ -227,8 +227,8 @@ namespace Hypernex.Game
 
         private void LoadScene()
         {
-            Security.RemoveOffendingItems(currentScene, SecurityTools.AdditionalAllowedWorldTypes.ToArray());
-            Security.ApplyComponentRestrictions(currentScene);
+            Security.RemoveOffendingItems(loadedScene, SecurityTools.AdditionalAllowedWorldTypes.ToArray());
+            Security.ApplyComponentRestrictions(loadedScene);
             LocalPlayer.Instance.Camera.gameObject.AddComponent<AudioListener>();
             FocusedInstance = this;
             LocalScriptEvents = new ScriptEvents(SandboxRestriction.Local);

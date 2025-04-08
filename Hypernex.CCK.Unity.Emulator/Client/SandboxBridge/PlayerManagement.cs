@@ -35,7 +35,7 @@ namespace Hypernex.Game
             gameInstance.AvatarScriptEvents?.OnUserLeave.Invoke(user);
             if (!gameInstance.isHost) return;
             // Claim all NetworkSyncs that have Host Only
-            foreach (GameObject rootGameObject in gameInstance.currentScene.GetRootGameObjects())
+            foreach (GameObject rootGameObject in gameInstance.loadedScene.GetRootGameObjects())
             {
                 Transform[] ts = rootGameObject.GetComponentsInChildren<Transform>(true);
                 foreach (Transform transform in ts)

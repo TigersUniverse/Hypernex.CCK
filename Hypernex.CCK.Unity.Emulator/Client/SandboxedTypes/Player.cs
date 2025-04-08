@@ -44,10 +44,6 @@ namespace Hypernex.Sandboxing.SandboxedTypes
         
         public bool IsHost => gameInstance != null && gameInstance.host != null && gameInstance.host.Id == user.Id;
 
-        public Item Root => localPlayer != null
-            ? new Item(localPlayer.transform, sandboxRestriction != SandboxRestriction.Local)
-            : new Item(netPlayer.transform, true);
-
         public Avatar Avatar
         {
             get
