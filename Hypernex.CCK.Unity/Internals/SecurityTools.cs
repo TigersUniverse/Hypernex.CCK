@@ -4,6 +4,9 @@ using System.Linq;
 using System.Reflection;
 using Hypernex.CCK.Unity.Internals;
 using kTools.Mirrors;
+#if STEAMAUDIO_ENABLED
+using SteamAudio;
+#endif
 using TMPro;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;

@@ -22,22 +22,25 @@ namespace Hypernex.CCK.Unity.Editor.Editors
             {
                 WorldServerScripts w =
                     AssetDatabase.LoadAssetAtPath<WorldServerScripts>(EditorPrefs.GetString("WorldServerScript"));
-                if (w.ServerScripts.Contains(ModuleScript))
+                if(w != null)
                 {
-                    if (GUILayout.Button("Remove from " + w.name))
+                    if (w.ServerScripts.Contains(ModuleScript))
                     {
-                        w.ServerScripts = w.ServerScripts.Where(x => x != ModuleScript).ToArray();
-                        EditorUtility.SetDirty(w);
+                        if (GUILayout.Button("Remove from " + w.name))
+                        {
+                            w.ServerScripts = w.ServerScripts.Where(x => x != ModuleScript).ToArray();
+                            EditorUtility.SetDirty(w);
+                        }
                     }
-                }
-                else
-                {
-                    if (GUILayout.Button("Add to " + w.name))
+                    else
                     {
-                        List<ModuleScript> moduleScripts = w.ServerScripts.ToList();
-                        moduleScripts.Add(ModuleScript);
-                        w.ServerScripts = moduleScripts.ToArray();
-                        EditorUtility.SetDirty(w);
+                        if (GUILayout.Button("Add to " + w.name))
+                        {
+                            List<ModuleScript> moduleScripts = w.ServerScripts.ToList();
+                            moduleScripts.Add(ModuleScript);
+                            w.ServerScripts = moduleScripts.ToArray();
+                            EditorUtility.SetDirty(w);
+                        }
                     }
                 }
             }

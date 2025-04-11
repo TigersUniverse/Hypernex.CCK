@@ -33,6 +33,7 @@ namespace Hypernex.CCK.Unity.Internals
 
         private const string URP_PACKAGE = "com.unity.render-pipelines.universal";
         private const string UI_PACKAGE = "com.unity.ugui";
+        private const string AI_PACKAGE = "com.unity.ai.navigation";
         
         private static ListRequest ListRequest;
         private static List<AddRequest> AddRequests = new ();
@@ -91,6 +92,7 @@ namespace Hypernex.CCK.Unity.Internals
                     bool containsOXR = false;
                     bool containsURP = false;
                     bool containsUI = false;
+                    bool containsAI = false;
                     foreach (var package in ListRequest.Result)
                     {
                         if(package.name.Contains(XR_PLUGIN_MANAGEMENT_PACKAGE) && package.version == "4.4.0")
@@ -113,6 +115,8 @@ namespace Hypernex.CCK.Unity.Internals
                             containsUI = true;
                             AddScriptingDefineSymbol("UI");
                         }
+                        if (package.name.Contains(AI_PACKAGE))
+                            containsAI = true;
                     }
                     if (!containsXRM)
                     {
@@ -124,6 +128,8 @@ namespace Hypernex.CCK.Unity.Internals
                         AddRequests.Add(Client.Add(OPENXR_PLUGIN_PACKAGE));
                         RemoveScriptingDefineSymbol("OPENXR");
                     }
+                    if(!containsAI)
+                        AddRequests.Add(Client.Add(AI_PACKAGE));
                     if(!containsURP) RemoveScriptingDefineSymbol("URP");
                     if(!containsUI) RemoveScriptingDefineSymbol("UI");
                     EditorApplication.update += AddRequestF;

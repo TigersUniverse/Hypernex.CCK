@@ -41,7 +41,6 @@ namespace Hypernex.CCK.Unity.Assets
         public async void SetIdentifier()
         {
             bool valid = await UserAuth.Instance.IsValidAsset(UserInputId);
-            Logger.CurrentLogger.Log(valid);
             if(!valid)
             {
                 EditorUtility.DisplayDialog("Hypernex.CCK.Unity", "Id is not valid!", "OK");

@@ -13,6 +13,31 @@ namespace Hypernex.CCK.Unity.Descriptors
 
         public void SetWeight(float weight) => SkinnedMeshRenderer.SetBlendShapeWeight(BlendshapeIndex, weight);
 
+        public static int GetIndex(BlendshapeDescriptor[] blendshapes, BlendshapeDescriptor blendshapeDescriptor)
+        {
+            if (blendshapeDescriptor == null)
+                return 0;
+            for (int i = 0; i < blendshapes.Length; i++)
+            {
+                if (blendshapes[i].SkinnedMeshRenderer == blendshapeDescriptor.SkinnedMeshRenderer &&
+                    blendshapes[i].BlendshapeIndex == blendshapeDescriptor.BlendshapeIndex)
+                {
+                    return i + 1;
+                }
+            }
+            return 0;
+        }
+
+        public static BlendshapeDescriptor GetDescriptor(BlendshapeDescriptor[] blendshapes, int[] matchArray, int index)
+        {
+            if (matchArray == null || index < 0 || index >= matchArray.Length)
+                return null;
+            int selectedIndex = matchArray[index];
+            if (selectedIndex <= 0 || selectedIndex - 1 >= blendshapes.Length)
+                return null;
+            return blendshapes[selectedIndex - 1];
+        }
+
         public static BlendshapeDescriptor[] GetAllDescriptors(params SkinnedMeshRenderer[] skinnedMeshRenderers)
         {
             List<BlendshapeDescriptor> descriptors = new List<BlendshapeDescriptor>();
@@ -32,6 +57,26 @@ namespace Hypernex.CCK.Unity.Descriptors
                 }
             }
             return descriptors.ToArray();
+        }
+
+        public static Dictionary<SkinnedMeshRenderer, HashSet<int>> GetUsedBlendshapes(
+            BlendshapeDescriptor[] allDescriptors, params int[][] matchArrays)
+        {
+            Dictionary<SkinnedMeshRenderer, HashSet<int>> used = new Dictionary<SkinnedMeshRenderer, HashSet<int>>();
+            foreach (var matchArray in matchArrays)
+            {
+                for (int i = 0; i < matchArray.Length; i++)
+                {
+                    int selectedIndex = matchArray[i];
+                    if (selectedIndex <= 0 || selectedIndex - 1 >= allDescriptors.Length) continue;
+                    BlendshapeDescriptor descriptor = allDescriptors[selectedIndex - 1];
+                    if (descriptor?.SkinnedMeshRenderer == null) continue;
+                    if (!used.TryGetValue(descriptor.SkinnedMeshRenderer, out HashSet<int> set))
+                        used[descriptor.SkinnedMeshRenderer] = set = new HashSet<int>();
+                    set.Add(descriptor.BlendshapeIndex);
+                }
+            }
+            return used;
         }
     }
 }

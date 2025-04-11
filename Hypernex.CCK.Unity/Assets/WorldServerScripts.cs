@@ -56,6 +56,7 @@ namespace Hypernex.CCK.Unity.Assets
             bool t = EditorPrefs.HasKey("WorldServerScript");
             if(!t) return TriValidationResult.Error("You are not testing any ServerScripts!");
             WorldServerScripts w = AssetDatabase.LoadAssetAtPath<WorldServerScripts>(EditorPrefs.GetString("WorldServerScript"));
+            if(w == null) return TriValidationResult.Error("You are not testing any ServerScripts!");
             return TriValidationResult.Info($"You are testing {w.name}");
         }
 

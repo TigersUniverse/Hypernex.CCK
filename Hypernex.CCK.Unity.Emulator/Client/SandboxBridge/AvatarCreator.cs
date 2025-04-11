@@ -59,6 +59,8 @@ namespace Hypernex.Game.Avatar
             ? Array.Empty<AnimatorControllerParameter>()
             : MainAnimator.parameters;
         
+        protected BlendshapeDescriptor[] VisemeRenderers { get; private set; }
+        
         protected GameObject HeadAlign;
         internal GameObject VoiceAlign;
 
@@ -68,6 +70,7 @@ namespace Hypernex.Game.Avatar
         internal AudioSource audioSource;
         internal List<Sandbox> localAvatarSandboxes = new();
         internal RotationOffsetDriver headRotator;
+        private Dictionary<SkinnedMeshRenderer, HashSet<int>> usedVisemes;
 
         protected void OnCreate(CCK.Unity.Assets.Avatar a, int layer, AllowedAvatarComponent allowedAvatarComponent)
         {
@@ -92,6 +95,8 @@ namespace Hypernex.Game.Avatar
             Transform head = MainAnimator.GetBoneTransform(HumanBodyBones.Head);
             if(head == null) return;
             headRotator = new RotationOffsetDriver(head, a.transform);
+            VisemeRenderers = BlendshapeDescriptor.GetAllDescriptors(a.VisemeRenderers.ToArray());
+            usedVisemes = BlendshapeDescriptor.GetUsedBlendshapes(VisemeRenderers, a.VisemesDict);
         }
 
         protected void DriveCamera(Transform cam)
@@ -547,24 +552,22 @@ namespace Hypernex.Game.Avatar
             {
                 PathDescriptor p = skinnedMeshRenderer.gameObject.GetComponent<PathDescriptor>();
                 if(p == null) continue;
-                BlendshapeDescriptor[] lipDescriptors =
-                    BlendshapeDescriptor.GetAllDescriptors(Avatar.VisemeRenderers.ToArray());
                 for (int i = 0; i < skinnedMeshRenderer.sharedMesh.blendShapeCount; i++)
                 {
-                    // Exclude Visemes
-                    if (Avatar.UseVisemes && lipDescriptors.Count(x =>
-                            x.SkinnedMeshRenderer == skinnedMeshRenderer && x.BlendshapeIndex == i) > 0) continue;
-                    // Exclude ShadowClones
-                    if(skinnedMeshRenderer.gameObject.name.Contains("shadowclone_")) continue;
+                    if (Avatar.UseVisemes &&
+                        usedVisemes.TryGetValue(skinnedMeshRenderer, out HashSet<int> used) &&
+                        used.Contains(i))
+                    {
+                        continue;
+                    }
                     float w = skinnedMeshRenderer.GetBlendShapeWeight(i);
-                    WeightedObjectUpdate weightedObjectUpdate = new WeightedObjectUpdate
+                    weights.Add(new WeightedObjectUpdate
                     {
                         PathToWeightContainer = p.path,
                         TypeOfWeight = BLENDSHAPE_ID,
                         WeightIndex = i.ToString(),
                         Weight = w
-                    };
-                    weights.Add(weightedObjectUpdate);
+                    });
                 }
             }
             return weights;
