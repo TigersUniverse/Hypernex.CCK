@@ -34,7 +34,7 @@ namespace Hypernex.CCK.Unity.Editor.Windows.Renderers
             {
                 ["anime"] = ("Anime", s => $"{s}s that are based on anime characters"),
                 ["furry"] = ("Furry", s => $"{s}s that are based on furry characters"),
-                ["cartoon"] = ("Cartoon", s => $"{s}s what have a cartoon look"),
+                ["robot"] = ("Robot", s => $"{s}s that go beep boop."),
                 ["realistic"] = ("Realistic", s => $"{s}s that are very realistic looking"),
                 ["funny"] = ("Funny", s => $"{s}s that are made for comedic purposes")
             };
