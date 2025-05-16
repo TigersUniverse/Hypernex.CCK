@@ -87,6 +87,7 @@ namespace Hypernex.CCK.Unity.Editor.Editors
             if(validNames.Item1 > 0)
                 EditorUtils.DrawSpecialHelpBox((MessageType) validNames.Item1, validNames.Item2);
             EditorUtils.PropertyField(ScriptAssets, "Script Assets");
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }
