@@ -1,6 +1,6 @@
 {
     "name": "dev.hypernex.cck.unity.emulator",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "displayName": "Hypernex.CCK.Unity.Emulator",
     "description": "The Editor Emulator for the Content Creation Kit (CCK) for Hypernex in Unity.",
     "unity": "2023.2",
@@ -9,8 +9,8 @@
     "changelogUrl": "https://forum.hypernex.dev/c/announcements/5",
     "licensesUrl": "https://opensource.org/license/mit/",
     "dependencies": {
-        "dev.hypernex.cck.unity": "2.0.0",
-        "dev.hypernex.cck.unity.editor": "2.0.0",
+        "dev.hypernex.cck.unity": "2.0.1",
+        "dev.hypernex.cck.unity.editor": "2.0.1",
         "com.unity.ai.navigation": "2.0.6",
         "com.unity.mathematics": "1.2.6"
     },
