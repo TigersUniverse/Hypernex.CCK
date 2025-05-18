@@ -11,7 +11,8 @@
     "dependencies": {
         "dev.hypernex.cck.unity": "2.0.0",
         "dev.hypernex.cck.unity.editor": "2.0.0",
-        "com.unity.ai.navigation": "*"
+        "com.unity.ai.navigation": "2.0.6",
+        "com.unity.mathematics": "1.2.6"
     },
     "keywords": [
         "Hypernex",

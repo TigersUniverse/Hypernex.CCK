@@ -82,6 +82,7 @@ namespace Hypernex.CCK.Unity.Editor.Editors
             if (validSpawns.Item1 > 0)
                 EditorUtils.DrawSpecialHelpBox((MessageType) validSpawns.Item1, validSpawns.Item2);
             EditorUtils.PropertyField(SpawnPoints, "Spawn Points");
+            EditorGUILayout.Space();
             EditorUtils.DrawTitle("Scripting");
             (int, string) validNames = ValidateNames();
             if(validNames.Item1 > 0)

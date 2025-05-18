@@ -9,10 +9,10 @@
     "changelogUrl": "https://forum.hypernex.dev/c/announcements/5",
     "licensesUrl": "https://opensource.org/license/mit/",
     "dependencies": {
-        "com.unity.xr.management": "*",
-        "com.unity.xr.openxr": "*",
-        "com.unity.render-pipelines.universal": "*",
-        "com.unity.ugui": "*"
+        "com.unity.xr.management": "4.4.0",
+        "com.unity.xr.openxr": "1.14.1",
+        "com.unity.render-pipelines.universal": "16.0.6",
+        "com.unity.ugui": "2.0.0"
     },
     "keywords": [
         "Hypernex",

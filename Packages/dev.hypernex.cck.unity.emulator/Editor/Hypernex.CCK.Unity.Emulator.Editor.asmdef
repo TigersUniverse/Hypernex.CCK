@@ -1,0 +1,20 @@
+{
+    "name": "Hypernex.CCK.Unity.Emulator.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:aff0749a2b475d04bb777b1022fe4bc4",
+        "GUID:a3daf01fa2110fd4ab3dd3cda0dce751",
+        "GUID:bf311843e5b0d8f4f80ec4c1f7128b4b"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

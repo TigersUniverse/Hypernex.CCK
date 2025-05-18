@@ -20,17 +20,11 @@ using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using Avatar = Hypernex.CCK.Unity.Assets.Avatar;
 
 namespace Hypernex.CCK.Unity.Emulator
 {
     [RequireComponent(typeof(DontDestroyMe))]
-#if UNITY_EDITOR
-    [InitializeOnLoad]
-#endif
     public class Init : MonoBehaviour, IDisposable
     {
         public static Init Instance { get; private set; }
@@ -47,26 +41,11 @@ namespace Hypernex.CCK.Unity.Emulator
         public HypernexInstance instance;
         private List<ScriptHandler> scriptHandlers = new List<ScriptHandler>();
         private GameInstance gameInstance;
+        public Avatar avatar;
+        public bool clone;
         
         public readonly User[] users = new[] {UserAuth.Instance.user};
         public List<User> usersList;
-        
-        static Init()
-        {
-#if UNITY_EDITOR
-            PackageManager.AddScriptingDefineSymbol("HYPERNEX_CCK_EMULATOR");
-            EditorApplication.playModeStateChanged += LogPlayModeState;
-#endif
-        }
-
-#if UNITY_EDITOR
-        private static void LogPlayModeState(PlayModeStateChange state)
-        {
-            if(state != PlayModeStateChange.EnteredPlayMode) return;
-            GameObject init = new GameObject("Init");
-            init.AddComponent<Init>();
-        }
-#endif
         
         private string GetYTDLLocation() => Path.Combine(AuthConfig.GetEditorConfigPath(), "ytdl");
 
@@ -74,21 +53,6 @@ namespace Hypernex.CCK.Unity.Emulator
         {
             Scene activeScene = SceneManager.GetActiveScene();
             World world = FindFirstObjectByType<World>(FindObjectsInactive.Include);
-            Avatar avatar = null;
-            bool clone = true;
-#if UNITY_EDITOR
-            string avatarGameObjectName = EditorPrefs.GetString("AvatarName");
-            if (!string.IsNullOrEmpty(avatarGameObjectName))
-            {
-                clone = false;
-                GameObject[] p = activeScene.GetRootGameObjects().Where(x => x.name == avatarGameObjectName).ToArray();
-                foreach (GameObject possibleAvatar in p)
-                {
-                    avatar = possibleAvatar.GetComponent<Avatar>();
-                    if(avatar != null) break;
-                }
-            }
-#endif
             if (world == null && avatar == null) return;
             if (world == null)
             {
@@ -96,8 +60,6 @@ namespace Hypernex.CCK.Unity.Emulator
                 worldObject.transform.position = Vector3.up;
                 world = worldObject.AddComponent<World>();
             }
-            if (avatar == null)
-                clone = true;
             usersList = users.ToList();
             OutlineMaterial = Resources.Load<Material>("OutlineMaterial");
             DefaultAvatarAnimatorController = Resources.Load<RuntimeAnimatorController>("CharacterController");
