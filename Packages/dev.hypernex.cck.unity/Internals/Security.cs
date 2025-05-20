@@ -239,20 +239,6 @@ namespace Hypernex.CCK.Unity.Internals
                 }
             }
         }
-
-        public static Type[] GetDynamicBoneTypes(Assembly assembly)
-        {
-            List<Type> types = new List<Type>();
-            Type dynamicBone = assembly.GetType("DynamicBone");
-            Type dynamicBoneCollider = assembly.GetType("DynamicBoneCollider");
-            Type dynamicBonePlaneCollider = assembly.GetType("DynamicBonePlaneCollider");
-            Type dynamicBoneColliderBase = assembly.GetType("DynamicBoneColliderBase");
-            if(dynamicBone != null) types.Add(dynamicBone);
-            if(dynamicBoneCollider != null) types.Add(dynamicBoneCollider);
-            if(dynamicBonePlaneCollider != null) types.Add(dynamicBonePlaneCollider);
-            if(dynamicBoneColliderBase != null) types.Add(dynamicBoneColliderBase);
-            return types.ToArray();
-        }
     }
 
     public struct AllowedAvatarComponent

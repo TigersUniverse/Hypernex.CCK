@@ -46,11 +46,6 @@ namespace Hypernex.CCK.Unity.Internals
             AdditionalAllowedWorldTypes.Allow(typeof(SteamAudioAmbisonicSource));
             AdditionalAllowedWorldTypes.Allow(typeof(SteamAudioStaticMesh));
 #endif
-            try
-            {
-                // This can fail easily if the assembly is tampered with
-                Security.GetDynamicBoneTypes(Assembly.GetExecutingAssembly()).ToList().ForEach(Security.PhysicsTypes.Allow);
-            } catch(Exception){}
 #if URP
             Security.LightTypes.Allow(typeof(UniversalAdditionalLightData));
             AdditionalAllowedWorldTypes.Allow(typeof(UniversalAdditionalCameraData));
