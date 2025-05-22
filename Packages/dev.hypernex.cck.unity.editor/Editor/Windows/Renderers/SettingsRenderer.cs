@@ -16,6 +16,7 @@ namespace Hypernex.CCK.Unity.Editor.Windows.Renderers
         
         public static async void GetServer(UserAuth auth)
         {
+            if(auth == null) return;
             List<CDNServer> servers = await auth.GetCDNs();
             Servers.Clear();
             foreach (CDNServer cdnServer in servers)

@@ -44,7 +44,7 @@ namespace Hypernex.CCK.Unity.Emulator
         public Avatar avatar;
         public bool clone;
         
-        public readonly User[] users = new[] {UserAuth.Instance.user};
+        public readonly User[] users = new[] {(UserAuth.Instance != null && UserAuth.Instance.user != null) ? UserAuth.Instance.user : new User()};
         public List<User> usersList;
         
         private string GetYTDLLocation() => Path.Combine(AuthConfig.GetEditorConfigPath(), "ytdl");

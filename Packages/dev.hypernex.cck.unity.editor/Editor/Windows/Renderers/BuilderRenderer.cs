@@ -64,7 +64,12 @@ namespace Hypernex.CCK.Unity.Editor.Windows.Renderers
             this.auth = auth;
             this.assetType = assetType;
             selectedBuildPlatform = EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android ? 1 : 0;
+            UserAuth.OnLoginHandled += OnLoginHandled;
         }
+        
+        ~BuilderRenderer() => UserAuth.OnLoginHandled -= OnLoginHandled;
+
+        private void OnLoginHandled() => auth = UserAuth.Instance;
 
         protected bool UpdateBuildTarget(BuildPlatform buildPlatform)
         {

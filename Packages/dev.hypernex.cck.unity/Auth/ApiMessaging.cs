@@ -28,6 +28,7 @@ namespace Hypernex.CCK.Auth
         public static async Task<List<CDNServer>> GetCDNs(this UserAuth auth)
         {
             TaskCompletionSource<List<CDNServer>> results = new TaskCompletionSource<List<CDNServer>>();
+            if (auth == null || auth.hypernexObject == null) return new List<CDNServer>();
             auth.hypernexObject.GetCDNs(r =>
                 results.SetResult(r.success ? r.result.Servers : new List<CDNServer>()));
             return await results.Task;

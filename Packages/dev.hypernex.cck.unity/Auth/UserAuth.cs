@@ -14,6 +14,7 @@ namespace Hypernex.CCK.Unity.Auth
         
         public static UserAuth Instance { get; set; }
 
+        public static Action OnLoginHandled = () => { };
         public static Action OnInvalidConfigLoaded = () => { };
         private static HttpClient httpClient = new HttpClient();
 
@@ -131,6 +132,7 @@ namespace Hypernex.CCK.Unity.Auth
             user = await userTask.Task;
             IsAuth = user != null;
             if(!IsAuth || user == null) return;
+            OnLoginHandled.Invoke();
             SaveToConfig();
         }
 
