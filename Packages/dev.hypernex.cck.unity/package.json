@@ -1,6 +1,6 @@
 {
     "name": "dev.hypernex.cck.unity",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "displayName": "Hypernex.CCK.Unity",
     "description": "The Base Content Creation Kit (CCK) for Hypernex in Unity.",
     "unity": "2023.2",

@@ -1,6 +1,5 @@
 ﻿using Hypernex.Tools;
 using Nexbox;
-using Unity.VisualScripting;
 
 namespace Hypernex.Sandboxing.SandboxedTypes
 {
@@ -11,7 +10,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             SandboxFunc s = SandboxFuncTools.TryConvert(o);
             ColliderEvents collider = item.t.GetComponent<ColliderEvents>();
             if (collider == null)
-                collider = item.t.AddComponent<ColliderEvents>();
+                collider = item.t.gameObject.AddComponent<ColliderEvents>();
             collider.TriggerEnter += c =>
                 SandboxFuncTools.InvokeSandboxFunc(s, new Collider(c, item.IsReadOnly));
         }
@@ -21,7 +20,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             SandboxFunc s = SandboxFuncTools.TryConvert(o);
             ColliderEvents collider = item.t.GetComponent<ColliderEvents>();
             if (collider == null)
-                collider = item.t.AddComponent<ColliderEvents>();
+                collider = item.t.gameObject.AddComponent<ColliderEvents>();
             collider.TriggerStay += c => SandboxFuncTools.InvokeSandboxFunc(s, new Collider(c, item.IsReadOnly));
         }
         
@@ -30,7 +29,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             SandboxFunc s = SandboxFuncTools.TryConvert(o);
             ColliderEvents collider = item.t.GetComponent<ColliderEvents>();
             if (collider == null)
-                collider = item.t.AddComponent<ColliderEvents>();
+                collider = item.t.gameObject.AddComponent<ColliderEvents>();
             collider.TriggerExit += c =>
                 SandboxFuncTools.InvokeSandboxFunc(s, new Collider(c, item.IsReadOnly));
         }
@@ -40,7 +39,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             SandboxFunc s = SandboxFuncTools.TryConvert(o);
             ColliderEvents collider = item.t.GetComponent<ColliderEvents>();
             if (collider == null)
-                collider = item.t.AddComponent<ColliderEvents>();
+                collider = item.t.gameObject.AddComponent<ColliderEvents>();
             collider.CollisionEnter += c =>
                 SandboxFuncTools.InvokeSandboxFunc(s, new Collision(c, item.IsReadOnly));
         }
@@ -50,7 +49,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             SandboxFunc s = SandboxFuncTools.TryConvert(o);
             ColliderEvents collider = item.t.GetComponent<ColliderEvents>();
             if (collider == null)
-                collider = item.t.AddComponent<ColliderEvents>();
+                collider = item.t.gameObject.AddComponent<ColliderEvents>();
             collider.CollisionStay += c =>
                 SandboxFuncTools.InvokeSandboxFunc(s, new Collision(c, item.IsReadOnly));
         }
@@ -60,7 +59,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             SandboxFunc s = SandboxFuncTools.TryConvert(o);
             ColliderEvents collider = item.t.GetComponent<ColliderEvents>();
             if (collider == null)
-                collider = item.t.AddComponent<ColliderEvents>();
+                collider = item.t.gameObject.AddComponent<ColliderEvents>();
             collider.CollisionExit += c =>
                 SandboxFuncTools.InvokeSandboxFunc(s, new Collision(c, item.IsReadOnly));
         }
