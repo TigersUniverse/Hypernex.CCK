@@ -26,7 +26,7 @@ namespace Hypernex.CCK.Unity.Editor.Editors
         {
             if (World.SpawnPoints.Count <= 0)
                 return (1, "No SpawnPoints specified. This GameObject will be the default.");
-            foreach (GameObject spawnPoint in SpawnPoints)
+            foreach (GameObject spawnPoint in World.SpawnPoints)
             {
                 if(spawnPoint == null)
                     return (3, "SpawnPoint cannot be null!");
