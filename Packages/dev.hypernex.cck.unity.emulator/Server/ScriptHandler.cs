@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Hypernex.CCK;
 using Hypernex.Networking.Messages;
 using Hypernex.Networking.Messages.Data;
+using Hypernex.Networking.SandboxedClasses;
 using Hypernex.Networking.Server.SandboxedClasses;
+using Hypernex.Networking.Server.SandboxedClasses.Handlers;
 using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Tools;
 using Nexbox;
@@ -15,6 +16,7 @@ using Nexbox.Interpreters;
 using Nexport;
 using UnityEngine;
 using Logger = Hypernex.CCK.Logger;
+using Streaming = Hypernex.Networking.Server.SandboxedClasses.Streaming;
 using Time = Hypernex.Sandboxing.SandboxedTypes.Time;
 
 namespace Hypernex.Networking.Server
@@ -54,7 +56,11 @@ namespace Hypernex.Networking.Server
             ["Instance"] = typeof(Instance),
             ["Time"] = typeof(Time),
             ["UtcTime"] = typeof(UtcTime),
-            ["ScriptEvents"] = typeof(ScriptEvents)
+            ["ScriptEvent"] = typeof(ScriptEvent),
+            ["ScriptEvents"] = typeof(ScriptEvents),
+            ["Streaming"] = typeof(Streaming),
+            ["VideoRequest"] = typeof(VideoRequest),
+            ["StreamDownloadOptions"] = typeof(StreamDownloadOptions)
         };
 
         internal static ScriptHandler GetScriptHandlerFromInstance(HypernexInstance instance)
@@ -79,7 +85,11 @@ namespace Hypernex.Networking.Server
                 if (meta.TypeOfData == typeof(NetworkedEvent))
                 {
                     NetworkedEvent networkedEvent = (NetworkedEvent) Convert.ChangeType(meta.Data, typeof(NetworkedEvent))!;
-                    Events.OnUserNetworkEvent.Invoke(userId, networkedEvent.EventName, (object[])networkedEvent.Data.ToArray()[0]);
+                    Events.OnUserNetworkEvent.Invoke(userId, networkedEvent.EventName,networkedEvent.Data.Select(x =>
+                    {
+                        x.Fix();
+                        return x.Data;
+                    }).ToArray());
                 }
             };
             Instance.OnClientDisconnect += Events.OnUserLeave;
@@ -88,9 +98,7 @@ namespace Hypernex.Networking.Server
 
         private void CreateGlobalsForInterpreter(IInterpreter interpreter)
         {
-            interpreter.CreateGlobal("Events", Events);
-            interpreter.CreateGlobal("NetworkEvent", new ServerNetworkEvent(this));
-            interpreter.CreateGlobal("Instance", new Instance(Instance));
+            interpreter.CreateGlobal("instance", new Instance(Instance, Events, new ServerNetworkEvent(this)));
             foreach (KeyValuePair<string,object> keyValuePair in GlobalsToForward)
                 interpreter.CreateGlobal(keyValuePair.Key, keyValuePair.Value);
         }

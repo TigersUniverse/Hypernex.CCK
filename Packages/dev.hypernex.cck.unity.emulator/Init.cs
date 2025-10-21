@@ -9,6 +9,7 @@ using Hypernex.CCK.Unity.Auth;
 using Hypernex.CCK.Unity.Internals;
 using Hypernex.Game;
 using Hypernex.Game.Avatar;
+using Hypernex.Game.Video.StreamProviders;
 using Hypernex.Networking;
 using Hypernex.Networking.Server;
 using Hypernex.Sandboxing.SandboxedTypes;
@@ -47,7 +48,9 @@ namespace Hypernex.CCK.Unity.Emulator
         public readonly User[] users = new[] {(UserAuth.Instance != null && UserAuth.Instance.user != null) ? UserAuth.Instance.user : new User()};
         public List<User> usersList;
         
-        private string GetYTDLLocation() => Path.Combine(AuthConfig.GetEditorConfigPath(), "ytdl");
+        public string GetPrivateLocation() => Path.Combine(Application.persistentDataPath, "Private");
+        public string GetMediaLocation() => Path.Combine(Application.streamingAssetsPath, "media");
+        public string GetYTLocation() => Path.Combine(GetMediaLocation(), "ytdlp");
 
         private void Start()
         {
@@ -70,20 +73,29 @@ namespace Hypernex.CCK.Unity.Emulator
             thread.AddComponent<DontDestroyMe>();
             thread.AddComponent<UnityMainThreadDispatcher>();
             thread.AddComponent<CoroutineRunner>();
-            if (!Directory.Exists(GetYTDLLocation()))
-                Directory.CreateDirectory(GetYTDLLocation());
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            Streaming.ytdl.YoutubeDLPath = Path.Combine(GetYTDLLocation(), "yt-dlp.exe");
-            Streaming.ytdl.FFmpegPath = Path.Combine(GetYTDLLocation(), "ffmpeg.exe");
-#elif UNITY_MAC
-        Streaming.ytdl.YoutubeDLPath = Path.Combine(GetYTDLLocation(), "yt-dlp_macos");
-        Streaming.ytdl.FFmpegPath = Path.Combine(GetYTDLLocation(), "ffmpeg");
-#else
-        Streaming.ytdl.YoutubeDLPath = Path.Combine(GetYTDLLocation(), "yt-dlp");
-        Streaming.ytdl.FFmpegPath = Path.Combine(GetYTDLLocation(), "ffmpeg");
+            if (!Directory.Exists(GetPrivateLocation()))
+                Directory.CreateDirectory(GetPrivateLocation());
+            if (!Directory.Exists(GetMediaLocation()))
+                Directory.CreateDirectory(GetMediaLocation());
+            try
+            {
+#if !UNITY_IOS && !UNITY_ANDROID
+                string ytPath = GetYTLocation();
+                if (!Directory.Exists(ytPath))
+                    Directory.CreateDirectory(ytPath);
+                YoutubeDLSharp.Utils.DownloadBinaries(true, ytPath);
+                YouTubeStreamProvider.ytdl.OutputFolder = ytPath;
+                YouTubeStreamProvider.ytdl.FFmpegPath = Path.Combine(ytPath, YoutubeDLSharp.Utils.FfmpegBinaryName);
+                YouTubeStreamProvider.ytdl.YoutubeDLPath = Path.Combine(ytPath, YoutubeDLSharp.Utils.YtDlpBinaryName);
+                Networking.Server.SandboxedClasses.Streaming.ytdlp.OutputFolder = ytPath;
+                Networking.Server.SandboxedClasses.Streaming.ytdlp.FFmpegPath = Path.Combine(ytPath, YoutubeDLSharp.Utils.FfmpegBinaryName);
+                Networking.Server.SandboxedClasses.Streaming.ytdlp.YoutubeDLPath = Path.Combine(ytPath, YoutubeDLSharp.Utils.YtDlpBinaryName);
 #endif
-            Streaming.ytdl.OutputFolder = Path.Combine(GetYTDLLocation(), "Downloads");
-            YoutubeDLSharp.Utils.DownloadBinaries(true, GetYTDLLocation());
+            }
+            catch (Exception e)
+            {
+                Logger.CurrentLogger.Critical(e);
+            }
             SecurityTools.AllowExtraTypes();
             ExtraSandboxTools.ImplementRestrictions();
             kTools.Mirrors.Mirror.OnMirrorCreation += mirror => mirror.CustomCameraControl = true;
