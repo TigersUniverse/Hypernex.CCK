@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using Hypernex.CCK;
+using Hypernex.CCK.Unity.Emulator;
 using Hypernex.Networking.SandboxedClasses;
 using Nexbox;
-using UnityEngine;
 using YoutubeDLSharp;
 using YoutubeDLSharp.Metadata;
-using Logger = Hypernex.CCK.Logger;
+using YoutubeDLSharp.Options;
 
 namespace Hypernex.Networking.Server.SandboxedClasses
 {
@@ -66,7 +67,6 @@ namespace Hypernex.Networking.Server.SandboxedClasses
         {
             try
             {
-                Logger.CurrentLogger.Log(url);
                 VideoRequest videoRequest = VideoRequestHelper.Create(url, options);
                 Uri uri = new Uri(url);
                 if (NeedsClientFetch(uri.Host))
@@ -103,7 +103,30 @@ namespace Hypernex.Networking.Server.SandboxedClasses
                     SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), videoRequest);
                     return;
                 }
-                VideoRequestHelper.SetDownloadUrl(ref videoRequest, metaResult.Data.Url);
+                // EMULATOR ONLY
+                OptionSet optionSet = new OptionSet
+                {            
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_MAC
+                    Format = "bestvideo[vcodec=vp8]/bestvideo[vcodec=h264]+bestaudio/best"
+#else
+                    Format = "bestvideo[vcodec=vp8]+bestaudio/best"
+#endif
+                    , ExtractorArgs = "youtube:player_client=default,web_safari;player_js_version=actual"
+                };
+                RunResult<string> download = options.AudioOnly
+                    ? await ytdlp.RunAudioDownload(url, overrideOptions: optionSet)
+                    : await ytdlp.RunVideoDownload(url, overrideOptions: optionSet);
+                if (!download.Success)
+                {
+                    foreach (string s in download.ErrorOutput)
+                        Logger.CurrentLogger.Error(s);
+                    if(string.IsNullOrEmpty(download.Data) || !File.Exists(download.Data))
+                        throw new Exception("Failed to get data!");
+                }
+                string newFileLocation =
+                    Path.Combine(Init.Instance.GetMediaLocation(), Path.GetFileName(download.Data));
+                File.Move(download.Data!, newFileLocation);
+                VideoRequestHelper.SetDownloadUrl(ref videoRequest, newFileLocation);
                 SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), videoRequest);
             }
             catch (Exception e)

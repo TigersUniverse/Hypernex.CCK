@@ -50,6 +50,13 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                     return;
                 }
                 string url = req.GetDownloadUrl();
+                // ONLY FOR EMULATOR
+                if (File.Exists(url))
+                {
+                    SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone),
+                        new StreamDownload(url, true));
+                    return;
+                }
                 Uri uri = new Uri(url);
                 if (req.GetIsStream())
                 {
