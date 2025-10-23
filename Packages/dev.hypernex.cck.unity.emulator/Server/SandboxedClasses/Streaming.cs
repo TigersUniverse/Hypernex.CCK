@@ -125,6 +125,8 @@ namespace Hypernex.Networking.Server.SandboxedClasses
                 }
                 string newFileLocation =
                     Path.Combine(Init.Instance.GetMediaLocation(), Path.GetFileName(download.Data));
+                if(File.Exists(newFileLocation))
+                    File.Delete(newFileLocation);
                 File.Move(download.Data!, newFileLocation);
                 VideoRequestHelper.SetDownloadUrl(ref videoRequest, newFileLocation);
                 SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), videoRequest);
