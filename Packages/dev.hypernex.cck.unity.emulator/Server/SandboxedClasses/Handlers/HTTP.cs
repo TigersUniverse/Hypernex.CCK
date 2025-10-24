@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Hypernex.Networking.Server.SandboxedClasses
+namespace Hypernex.Networking.Server.SandboxedClasses.Handlers
 {
     public class HTTP
     {
@@ -21,6 +21,8 @@ namespace Hypernex.Networking.Server.SandboxedClasses
             }
             return MediaTypeToString(HttpMediaType.TextPlain);
         }
+    
+        internal HTTP(){}
 
         public string Get(string url)
         {
